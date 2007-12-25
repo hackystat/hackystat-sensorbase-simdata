@@ -4,13 +4,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import javax.xml.datatype.XMLGregorianCalendar;
+
 import org.hackystat.sensorbase.client.SensorBaseClient;
 import org.hackystat.sensorbase.client.SensorBaseClientException;
 import org.hackystat.sensorbase.client.SensorBaseClient.InvitationReply;
 import org.hackystat.sensorbase.resource.projects.jaxb.Project;
 import org.hackystat.sensorbase.resource.projects.jaxb.UriPatterns;
+import org.hackystat.sensorbase.resource.sensordata.jaxb.Properties;
+import org.hackystat.sensorbase.resource.sensordata.jaxb.Property;
+import org.hackystat.sensorbase.resource.sensordata.jaxb.SensorData;
+import org.hackystat.simdata.simpletelemetry.SimpleTelemetry;
 import org.hackystat.utilities.logger.HackystatLogger;
-import org.hackystat.utilities.time.period.Day;
 import org.hackystat.utilities.tstamp.Tstamp;
 
 /**
@@ -47,12 +52,19 @@ public class SimData {
   }
   
   /**
+   * Returns the logger for indicating progress of the simulated data generation.
+   * @return The logger.
+   */
+  public Logger getLogger() {
+    return this.logger;
+  }
+  
+  /**
    * Registers the user with the test domain suffix at the host.
    * @param userName The user name, with the domain.
    * @throws Exception If problems occur. 
    */
   public void makeUser(String userName) throws Exception {
-    this.logger.info("Creating user: " + userName);
     String email = userName + testdomain;
     SensorBaseClient.registerUser(this.host, email);
     SensorBaseClient client = new SensorBaseClient(host, email, email);
@@ -68,20 +80,21 @@ public class SimData {
    * @param user The owner. 
    * @param start The start day for the project.
    * @param end The end day for the project. 
+   * @param uriPattern The UriPattern for this project.
    * @throws Exception If problems occur. 
    */
-  public void makeProject(String projectName, String user, String start, String end) 
+  public void makeProject(String projectName, String user, XMLGregorianCalendar start, 
+      XMLGregorianCalendar end, String uriPattern) 
   throws Exception {
-    this.logger.info("Creating project: " + projectName);
     String email = user + testdomain;
     Project project = new Project();
     project.setName(projectName);
     project.setOwner(email);
     project.setDescription("SimData project");
-    project.setStartTime(Tstamp.makeTimestamp(Day.getInstance(start)));
-    project.setEndTime(Tstamp.makeTimestamp(Day.getInstance(end)));
+    project.setStartTime(start);
+    project.setEndTime(end);
     UriPatterns uriPatterns = new UriPatterns();
-    uriPatterns.getUriPattern().add("*");
+    uriPatterns.getUriPattern().add(uriPattern);
     project.setUriPatterns(uriPatterns);
     this.clients.get(user).putProject(project);
   }
@@ -104,6 +117,147 @@ public class SimData {
     clients.get(newMember).reply(ownerEmail, projectName, InvitationReply.ACCEPT);
   }
   
+  /**
+   * Creates and returns a SensorData instance, initialized appropriately.
+   * @param user The owner (without the domain.)
+   * @param sdt The sensor data type.
+   * @param tool The tool name.
+   * @param resource The resource.
+   * @param tstamp The timestamp.
+   * @return The newly created SensorData instance.
+   */
+  private SensorData makeSensorData(String user, String sdt, String tool, String resource, 
+      XMLGregorianCalendar tstamp) {
+    String userEmail = user + testdomain;
+    SensorData data = new SensorData();
+    data.setOwner(userEmail);
+    data.setResource(resource);
+    data.setRuntime(tstamp);
+    data.setSensorDataType(sdt);
+    data.setTimestamp(tstamp);
+    data.setTool(tool);
+    data.setProperties(new Properties());
+    return data;
+  }
+  
+  /**
+   * Adds the passed key-value pair to the SensorData instance. 
+   * @param data The sensor data instance. 
+   * @param key The key.
+   * @param value The value.
+   */
+  private void addProperty(SensorData data, String key, String value) {
+    Property property = new Property();
+    property.setKey(key);
+    property.setValue(value);
+    data.getProperties().getProperty().add(property);
+  }
+  
+  /**
+   * Sends a set of DevEvents to the SensorBase host.
+   * @param user The user who will own these DevEvents.
+   * @param tstamp The starting timestamp.
+   * @param numDevEvents The total number of DevEvents to generate.  Each are five minutes apart.
+   * @param file The file to be used as the resource.
+   * @throws SensorBaseClientException If problems occur.
+   */
+  public void addDevEvents(String user, XMLGregorianCalendar tstamp, int numDevEvents, String file) 
+  throws SensorBaseClientException {
+    for (int i = 0; i < numDevEvents; i++) {
+      XMLGregorianCalendar timestamp = Tstamp.incrementMinutes(tstamp, i * 5);
+      SensorData data = makeSensorData(user, "DevEvent", "Eclipse", file, timestamp);
+      clients.get(user).putSensorData(data);
+    }
+  }
+  
+  /**
+   * Adds a single FileMetric sensor data instance. 
+   * @param user The user who owns this FileMetric.
+   * @param tstamp The tstamp (and runtime) for this FileMetric.
+   * @param file The resource.
+   * @param totalLines The total lines of code. 
+   * @throws SensorBaseClientException If problems occur. 
+   */
+  public void addFileMetric(String user, XMLGregorianCalendar tstamp, String file, int totalLines)
+  throws SensorBaseClientException {
+    SensorData data = makeSensorData(user, "FileMetric", "SCLC", file, tstamp);
+    addProperty(data, "TotalLines", String.valueOf(totalLines));
+    clients.get(user).putSensorData(data);
+  }
+  
+  /**
+   * Adds a single Commit sensor data instance. 
+   * @param user The user who owns this Commit.
+   * @param tstamp The tstamp (and runtime) for this Commit.
+   * @param file The resource.
+   * @param totalLines The total lines of code committed. 
+   * @param linesAdded The number of lines added.
+   * @param linesDeleted The number of lines deleted.
+   * @throws SensorBaseClientException If problems occur. 
+   */
+  public void addCommit(String user, XMLGregorianCalendar tstamp, String file, int totalLines, 
+      int linesAdded, int linesDeleted)
+  throws SensorBaseClientException {
+    SensorData data = makeSensorData(user, "Commit", "Subversion", file, tstamp);
+    addProperty(data, "totalLines", String.valueOf(totalLines));
+    addProperty(data, "linesAdded", String.valueOf(linesAdded));
+    addProperty(data, "linesDeleted", String.valueOf(linesDeleted));
+    clients.get(user).putSensorData(data);
+  }
+  
+  /**
+   * Adds a single Build sensor data instance. 
+   * @param user The user who owns this FileMetric.
+   * @param tstamp The tstamp (and runtime) for this FileMetric.
+   * @param file The resource.
+   * @param result The string Success or Failure.
+   * @param numBuilds The number of Build instances to create. 
+   * @throws SensorBaseClientException If problems occur. 
+   */
+  public void addBuilds(String user, XMLGregorianCalendar tstamp, String file, String result, 
+      int numBuilds) throws SensorBaseClientException {
+    for (int i = 0; i < numBuilds; i++) {
+      SensorData data = makeSensorData(user, "Build", "Ant", file, tstamp);
+      addProperty(data, "Result", result);
+      clients.get(user).putSensorData(data);
+    }
+  }
+  
+  /**
+   * Adds a single UnitTest sensor data instance. 
+   * @param user The user who owns this UnitTest.
+   * @param tstamp The tstamp (and runtime) for this UnitTest.
+   * @param file The resource.
+   * @param result The string "pass" or "fail"
+   * @param numTests The number of test instances to create.
+   * @throws SensorBaseClientException If problems occur. 
+   */
+  public void addUnitTests(String user, XMLGregorianCalendar tstamp, String file, String result, 
+      int numTests) 
+  throws SensorBaseClientException {
+    for (int i = 0; i < numTests; i++) {
+      SensorData data = makeSensorData(user, "UnitTest", "JUnit", file, tstamp);
+      addProperty(data, "Result", result);
+      clients.get(user).putSensorData(data);
+    }
+  }
+  
+  /**
+   * Adds a single Coverage sensor data instance with line-level coverage only. 
+   * @param user The user who owns this FileMetric.
+   * @param tstamp The tstamp (and runtime) for this FileMetric.
+   * @param file The resource.
+   * @param uncovered The number of uncovered lines.
+   * @param covered The number of covered lines.
+   * @throws SensorBaseClientException If problems occur. 
+   */
+  public void addCoverage(String user, XMLGregorianCalendar tstamp, String file, int covered, 
+      int uncovered) throws SensorBaseClientException {
+    SensorData data = makeSensorData(user, "Coverage", "Emma", file, tstamp);
+    addProperty(data, "line_Covered", String.valueOf(covered));
+    addProperty(data, "line_Uncovered", String.valueOf(uncovered));
+    clients.get(user).putSensorData(data);
+  }
   
   /**
    * Takes one argument, the SensorBase host, such as "http://localhost:9876/sensorbase".
@@ -111,11 +265,16 @@ public class SimData {
    * @throws Exception if problems occur.
    */
   public static void main(String[] args) throws Exception {
-    SimData simData = new SimData(args[0]);
-    simData.makeUser("joe.simdata");
-    simData.makeUser("bob.simdata");
-    simData.makeProject("FooBar", "joe.simdata", "2007-Jun-01", "2007-Aug-01");
-    simData.addMember("FooBar", "joe.simdata", "bob.simdata");
+    if (args.length == 0) {
+      System.out.println("SimData takes one argument, the SensorBase host URL.");
+      return;
+    }
+    // Get the host.
+    String host = args[0];
+    SimpleTelemetry simpleTelemetry = new SimpleTelemetry(host);
+    simpleTelemetry.makeSprint1();
+    simpleTelemetry.makeSprint2();
+  
   }
 
 }
