@@ -32,7 +32,7 @@ public class SimData {
   private Logger logger;
   
   /** The test domain for all users in this simulation. */
-  private String testdomain = "@hackystat.org";
+  private static final String testdomain = "@hackystat.org";
   
   /** Maps user names to their associated SensorBaseClients. */
   private Map<String, SensorBaseClient> clients = new HashMap<String, SensorBaseClient>();
@@ -57,6 +57,14 @@ public class SimData {
    */
   public Logger getLogger() {
     return this.logger;
+  }
+  
+  /**
+   * Returns the test domain used for these users.
+   * @return The test domain.
+   */
+  public static String getTestDomain() {
+    return SimData.testdomain;
   }
   
   /**
@@ -271,10 +279,8 @@ public class SimData {
     }
     // Get the host.
     String host = args[0];
-    SimpleTelemetry simpleTelemetry = new SimpleTelemetry(host);
-    simpleTelemetry.makeSprint1();
-    simpleTelemetry.makeSprint2();
-  
+    // Create the simple telemetry scenario.
+    new SimpleTelemetry(host);
   }
 
 }
