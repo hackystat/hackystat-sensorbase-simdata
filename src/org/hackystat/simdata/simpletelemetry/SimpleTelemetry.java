@@ -12,10 +12,12 @@ import org.hackystat.utilities.tstamp.Tstamp;
  * Illustrates simple use of Telemetry to understand development.  There are two developers, 
  * Joe and Bob, who are working on a Project in the "simpletelemetry" directory. Joe always works on
  * the file "Joe.java", and Bob always works on the file "Bob.java".   
- * We look at a number of Scrum "sprints", each lasting 1 week (5 days).
+ * This scenario creates four simulated Scrum "sprints", each lasting 1 week (5 days).
  * <ul>
- * <li> Sprint 1 (06/01 - 06/05): "Healthy" project.
- * <li> Sprint 2 2 (06-08 - 06/12): "Late start" week.   
+ * <li> Sprint 1: "Healthy" process and product measures.
+ * <li> Sprint 2: "Late Start".
+ * <li> Sprint 3: "High churn, falling coverage.
+ * <li> Sprint 4: The freeloader.
  * </ul>
  * 
  * @author Philip Johnson
@@ -40,6 +42,7 @@ public class SimpleTelemetry {
   
   private static final String SUCCESS = "Success";
   private static final String PASS = "pass";
+  private static final String LOGPREFIX = "SimpleTelemetry: Making data for day: ";
   
   /**
    * Runs the SimpleTelemetry scenerio.  Creates the two users, the project, and sends the data.
@@ -55,9 +58,9 @@ public class SimpleTelemetry {
     this.simData.addMember(project, joe, bob);
     
     makeSprint1();
-//    makeSprint2();
-//    makeSprint3();
-//    makeSprint4();
+    makeSprint2();
+    makeSprint3();
+    makeSprint4();
   }
   
   /**
@@ -74,7 +77,7 @@ public class SimpleTelemetry {
   private void makeSprint1() throws SensorBaseClientException {
     for (int i = 0; i < 5; i++) {
       XMLGregorianCalendar day = Tstamp.incrementDays(projectStart, i);
-      this.simData.getLogger().info("SimpleTelemetry: Making data for day: " + day);
+      this.simData.getLogger().info(LOGPREFIX + day);
       
       // Effort is constant, between three and four hours a day.
       this.simData.addDevEvents(joe, day, (12 * 3) + random.nextInt(12), joeFile);
@@ -83,8 +86,8 @@ public class SimpleTelemetry {
       // Size increases steadily, starting at about 100 and increasing by 10 or so lines per day.
       int joeFileSize = 100 + (i * 10) + random.nextInt(10); 
       int bobFileSize = 100 + (i * 10) + random.nextInt(10); 
-      simData.addFileMetric(joe, day, joeFile, joeFileSize);
-      simData.addFileMetric(bob, day, bobFile, bobFileSize);
+      simData.addFileMetric(joe, day, joeFile, joeFileSize, day);
+      simData.addFileMetric(joe, day, bobFile, bobFileSize, day);
       
       // Builds and unit tests between 2-6 times a day.
       simData.addBuilds(joe, day, joeDir, SUCCESS, 2 + random.nextInt(5));
@@ -95,12 +98,13 @@ public class SimpleTelemetry {
       // Coverage is always at least 80%.
       int joeUncovered = random.nextInt(20);
       int bobUncovered = random.nextInt(20);
-      simData.addCoverage(joe, day, joeFile, (joeFileSize - joeUncovered), joeUncovered);
-      simData.addCoverage(bob, day, bobFile, (bobFileSize - bobUncovered), bobUncovered);
+      simData.addCoverage(joe, day, joeFile, (joeFileSize - joeUncovered), joeUncovered, day);
+      simData.addCoverage(joe, day, bobFile, (bobFileSize - bobUncovered), bobUncovered, day);
       
-      // They each commit once a day, with relatively low churn (less than 20%).
-      simData.addCommit(joe, day, joeFile, joeFileSize, random.nextInt(10), random.nextInt(10));
-      simData.addCommit(bob, day, bobFile, bobFileSize, random.nextInt(10), random.nextInt(10));
+      // Joe commits twice a day, and Bob commits once, with relatively low churn (less than 20%).
+      simData.addCommit(joe, day, joeFile, random.nextInt(5), random.nextInt(5), random.nextInt(5));
+      simData.addCommit(joe, day, joeFile, random.nextInt(5), random.nextInt(5), random.nextInt(5));
+      simData.addCommit(bob, day, bobFile, random.nextInt(5), random.nextInt(5), random.nextInt(5));
     }
   }
   
@@ -115,14 +119,13 @@ public class SimpleTelemetry {
    * </ul>
    * @throws SensorBaseClientException If problems occur.
    */
-  @SuppressWarnings("unused")
   private void makeSprint2() throws SensorBaseClientException {
     // Move forward 7 days to start the second sprint.
     int dayOffset = 7;
     // Do first three days of sprint in one loop.
     for (int i = dayOffset + 0; i < dayOffset + 3; i++) {
       XMLGregorianCalendar day = Tstamp.incrementDays(projectStart, i);
-      this.simData.getLogger().info("SimpleTelemetry: Making data for day: " + day);
+      this.simData.getLogger().info(LOGPREFIX + day);
       
       // Effort is low, between zero minutes and 20 minutes.
       this.simData.addDevEvents(joe, day, 0 + random.nextInt(4), joeFile);
@@ -131,8 +134,8 @@ public class SimpleTelemetry {
       // Size is very low, between 20 and 30 LOC.
       int joeFileSize = 20 + random.nextInt(10); 
       int bobFileSize = 20 + random.nextInt(10); 
-      simData.addFileMetric(joe, day, joeFile, joeFileSize);
-      simData.addFileMetric(bob, day, bobFile, bobFileSize);
+      simData.addFileMetric(joe, day, joeFile, joeFileSize, day);
+      simData.addFileMetric(joe, day, bobFile, bobFileSize, day);
       
       // Builds and unit tests between 0-2 times a day.
       simData.addBuilds(joe, day, joeDir, SUCCESS, 0 + random.nextInt(1));
@@ -143,8 +146,8 @@ public class SimpleTelemetry {
       // Coverage is 0 - 10%
       int joeCovered = random.nextInt(10);
       int bobCovered = random.nextInt(10);
-      simData.addCoverage(joe, day, joeFile, joeCovered, (joeFileSize - joeCovered));
-      simData.addCoverage(bob, day, bobFile, bobCovered, (bobFileSize - bobCovered));
+      simData.addCoverage(joe, day, joeFile, joeCovered, (joeFileSize - joeCovered), day);
+      simData.addCoverage(joe, day, bobFile, bobCovered, (bobFileSize - bobCovered), day);
       
       // No commits for first three days.
     }
@@ -161,8 +164,8 @@ public class SimpleTelemetry {
       // Size increases dramatically, by 200 or so lines per day.
       int joeFileSize = (i * 100) +  random.nextInt(200); 
       int bobFileSize = (i * 100) + random.nextInt(200); 
-      simData.addFileMetric(joe, day, joeFile, joeFileSize);
-      simData.addFileMetric(bob, day, bobFile, bobFileSize);
+      simData.addFileMetric(joe, day, joeFile, joeFileSize, day);
+      simData.addFileMetric(joe, day, bobFile, bobFileSize, day);
       
       // Builds and unit tests between 20 and 40 per day
       simData.addBuilds(joe, day, joeDir, SUCCESS, 20 + random.nextInt(20));
@@ -173,13 +176,13 @@ public class SimpleTelemetry {
       // Coverage is around 40%
       int joeCovered = 30 + random.nextInt(20);
       int bobCovered = 30 + random.nextInt(20);
-      simData.addCoverage(joe, day, joeFile, joeCovered, (joeFileSize - joeCovered));
-      simData.addCoverage(bob, day, bobFile, bobCovered, (bobFileSize - bobCovered));
+      simData.addCoverage(joe, day, joeFile, joeCovered, (joeFileSize - joeCovered), day);
+      simData.addCoverage(joe, day, bobFile, bobCovered, (bobFileSize - bobCovered), day);
       
       // Lots of commits for last two days, with high churn.
-      simData.addCommit(joe, day, joeFile, joeFileSize, 
+      simData.addCommit(joe, day, joeFile, random.nextInt(20), 
           random.nextInt(joeFileSize), random.nextInt(joeFileSize));
-      simData.addCommit(bob, day, bobFile, bobFileSize, 
+      simData.addCommit(bob, day, bobFile, random.nextInt(20), 
           random.nextInt(bobFileSize), random.nextInt(bobFileSize));
     }
   }
@@ -193,13 +196,12 @@ public class SimpleTelemetry {
    * </ul>
    * @throws SensorBaseClientException If problems occur.
    */
-  @SuppressWarnings("unused")
   private void makeSprint3() throws SensorBaseClientException {
     // Move forward 14 days to start Sprint 3.
     int dayOffset = 14;
     for (int i = dayOffset + 0; i < dayOffset + 5; i++) {
       XMLGregorianCalendar day = Tstamp.incrementDays(projectStart, i);
-      this.simData.getLogger().info("SimpleTelemetry: Making data for day: " + day);
+      this.simData.getLogger().info(LOGPREFIX + day);
       
       // Effort varies between 0 and eight hours (12 * 8) 
       this.simData.addDevEvents(joe, day, 0 + random.nextInt(12 * 8), joeFile);
@@ -208,8 +210,8 @@ public class SimpleTelemetry {
       // Size is variable but has slight upward trend.
       int joeFileSize = 200 + (i * 20) + random.nextInt(100); 
       int bobFileSize = 200 + (i * 20) + random.nextInt(100); 
-      simData.addFileMetric(joe, day, joeFile, joeFileSize);
-      simData.addFileMetric(bob, day, bobFile, bobFileSize);
+      simData.addFileMetric(joe, day, joeFile, joeFileSize, day);
+      simData.addFileMetric(joe, day, bobFile, bobFileSize, day);
       
       // Builds and unit tests between 0-10 times a day.
       simData.addBuilds(joe, day, joeDir, SUCCESS, 0 + random.nextInt(10));
@@ -220,8 +222,8 @@ public class SimpleTelemetry {
       // Coverage starts out about 90%, but falls 10% per day with a little random jiggle.
       int joeCovered = 90 - (i * 10) + random.nextInt(3);
       int bobCovered = 90 - (i * 10) + random.nextInt(3);
-      simData.addCoverage(joe, day, joeFile, joeCovered, (joeFileSize - joeCovered));
-      simData.addCoverage(bob, day, bobFile, bobCovered, (bobFileSize - bobCovered));
+      simData.addCoverage(joe, day, joeFile, joeCovered, (joeFileSize - joeCovered), day);
+      simData.addCoverage(joe, day, bobFile, bobCovered, (bobFileSize - bobCovered), day);
       
       // Commits are regular and have high churn
       simData.addCommit(joe, day, joeFile, joeFileSize - random.nextInt(20), 
@@ -239,13 +241,12 @@ public class SimpleTelemetry {
    * <li> High churn on commits.
    * @throws SensorBaseClientException If problems occur.
    */
-  @SuppressWarnings("unused")
   private void makeSprint4() throws SensorBaseClientException {
     // Move forward 21 days to start Sprint 4.
     int dayOffset = 21;
     for (int i = dayOffset + 0; i < dayOffset + 5; i++) {
       XMLGregorianCalendar day = Tstamp.incrementDays(projectStart, i);
-      this.simData.getLogger().info("SimpleTelemetry: Making data for day: " + day);
+      this.simData.getLogger().info(LOGPREFIX + day);
       
       // Joe: Effort varies between 5 and 13 hours 
       this.simData.addDevEvents(joe, day, (12 * 5)  + random.nextInt(12 * 8), joeFile);
@@ -255,8 +256,8 @@ public class SimpleTelemetry {
       // Joe: size is variable, moving upward fast. Bob: not much size increase.
       int joeFileSize = 10 + (i * 40) + random.nextInt(20); 
       int bobFileSize = 10 + (i * 2) + random.nextInt(2); 
-      simData.addFileMetric(joe, day, joeFile, joeFileSize);
-      simData.addFileMetric(bob, day, bobFile, bobFileSize);
+      simData.addFileMetric(joe, day, joeFile, joeFileSize, day);
+      simData.addFileMetric(joe, day, bobFile, bobFileSize, day);
       
       // Builds and unit tests between 0-10 times a day.
       simData.addBuilds(joe, day, joeDir, SUCCESS, 5 + random.nextInt(2));
@@ -267,8 +268,8 @@ public class SimpleTelemetry {
       // Coverage starts out about 90%, but falls 10% per day with a little random jiggle.
       int joeCovered = 70 + random.nextInt(10);
       int bobCovered = 10 + random.nextInt(3);
-      simData.addCoverage(joe, day, joeFile, joeCovered, (joeFileSize - joeCovered));
-      simData.addCoverage(bob, day, bobFile, bobCovered, (bobFileSize - bobCovered));
+      simData.addCoverage(joe, day, joeFile, joeCovered, (joeFileSize - joeCovered), day);
+      simData.addCoverage(joe, day, bobFile, bobCovered, (bobFileSize - bobCovered), day);
       
       // Bob doesn't even commit.
       simData.addCommit(joe, day, joeFile, joeFileSize - random.nextInt(20), 

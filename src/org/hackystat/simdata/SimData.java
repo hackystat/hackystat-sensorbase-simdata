@@ -37,6 +37,9 @@ public class SimData {
   /** Maps user names to their associated SensorBaseClients. */
   private Map<String, SensorBaseClient> clients = new HashMap<String, SensorBaseClient>();
   
+  /** A millisecond offset to guarantee sensor data uniqueness. */
+  private int milliseconds = 0;
+  
   /**
    * Creates a SimData instance for the given host.
    * @param host The SensorBase host. 
@@ -125,8 +128,11 @@ public class SimData {
     clients.get(newMember).reply(ownerEmail, projectName, InvitationReply.ACCEPT);
   }
   
+ 
   /**
    * Creates and returns a SensorData instance, initialized appropriately.
+   * Tstamp is incremented by the internal millisecond counter in order to guarantee
+   * uniqueness, and its unincremented form is used for the runtime.  
    * @param user The owner (without the domain.)
    * @param sdt The sensor data type.
    * @param tool The tool name.
@@ -136,13 +142,31 @@ public class SimData {
    */
   private SensorData makeSensorData(String user, String sdt, String tool, String resource, 
       XMLGregorianCalendar tstamp) {
+    return makeSensorData(user, sdt, tool, resource, tstamp, tstamp);
+  }
+  
+  /**
+   * Creates and returns a SensorData instance, initialized appropriately.
+   * All timestamps are incremented by the internal millisecond counter in order to guarantee
+   * uniqueness. 
+   * @param user The owner (without the domain.)
+   * @param sdt The sensor data type.
+   * @param tool The tool name.
+   * @param resource The resource.
+   * @param tstamp The timestamp.
+   * @param runtime The runtime. 
+   * @return The newly created SensorData instance.
+   */
+  private SensorData makeSensorData(String user, String sdt, String tool, String resource, 
+      XMLGregorianCalendar tstamp, XMLGregorianCalendar runtime) {
+    XMLGregorianCalendar newTstamp = Tstamp.incrementMilliseconds(tstamp, this.milliseconds++);
     String userEmail = user + testdomain;
     SensorData data = new SensorData();
     data.setOwner(userEmail);
     data.setResource(resource);
-    data.setRuntime(tstamp);
+    data.setRuntime(runtime);
     data.setSensorDataType(sdt);
-    data.setTimestamp(tstamp);
+    data.setTimestamp(newTstamp);
     data.setTool(tool);
     data.setProperties(new Properties());
     return data;
@@ -184,11 +208,14 @@ public class SimData {
    * @param tstamp The tstamp (and runtime) for this FileMetric.
    * @param file The resource.
    * @param totalLines The total lines of code. 
+   * @param runtime The runtime timestamp, so that multiple FileMetrics will be bundled together in
+   * analyses.
    * @throws SensorBaseClientException If problems occur. 
    */
-  public void addFileMetric(String user, XMLGregorianCalendar tstamp, String file, int totalLines)
+  public void addFileMetric(String user, XMLGregorianCalendar tstamp, String file, int totalLines, 
+      XMLGregorianCalendar runtime)
   throws SensorBaseClientException {
-    SensorData data = makeSensorData(user, "FileMetric", "SCLC", file, tstamp);
+    SensorData data = makeSensorData(user, "FileMetric", "SCLC", file, tstamp, runtime);
     addProperty(data, "TotalLines", String.valueOf(totalLines));
     clients.get(user).putSensorData(data);
   }
@@ -257,11 +284,12 @@ public class SimData {
    * @param file The resource.
    * @param uncovered The number of uncovered lines.
    * @param covered The number of covered lines.
+   * @param runtime The runtime. 
    * @throws SensorBaseClientException If problems occur. 
    */
   public void addCoverage(String user, XMLGregorianCalendar tstamp, String file, int covered, 
-      int uncovered) throws SensorBaseClientException {
-    SensorData data = makeSensorData(user, "Coverage", "Emma", file, tstamp);
+      int uncovered, XMLGregorianCalendar runtime) throws SensorBaseClientException {
+    SensorData data = makeSensorData(user, "Coverage", "Emma", file, tstamp, runtime);
     addProperty(data, "line_Covered", String.valueOf(covered));
     addProperty(data, "line_Uncovered", String.valueOf(uncovered));
     clients.get(user).putSensorData(data);

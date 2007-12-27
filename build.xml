@@ -56,7 +56,9 @@
 
   <!-- The compile classpath is useful to many tools. -->
   <path id="compile.classpath">
-    <fileset file="${env.HACKYSTAT_SENSORBASE_HOME}/sensorbaseclient.jar"/>
+    <fileset file="${env.HACKYSTAT_SENSORBASE_HOME}/sensorbase.jar"/>
+    <fileset file="${env.HACKYSTAT_DAILYPROJECTDATA_HOME}/dailyprojectdata.jar"/>
+    <fileset file="${env.HACKYSTAT_TELEMETRY_HOME}/telemetry.jar"/>
     <fileset file="${env.JUNIT_HOME}/junit-${junit.version}.jar"/>
     <fileset file="${env.FINDBUGS_HOME}/lib/annotations.jar"/> 
   </path> 

@@ -5,6 +5,10 @@ import static org.hackystat.telemetry.service.server.ServerProperties.SENSORBASE
 
 import org.junit.BeforeClass;
 
+/**
+ * A helper class for constructing simulation scenarios.
+ * @author Philip Johnson
+ */
 public class SimDataTestHelper {
 
   /** The Sensorbase server used in these tests. */
@@ -18,7 +22,7 @@ public class SimDataTestHelper {
   
 
   /**
-   * Constructor.
+   * Constructor does nothing.
    */
   public SimDataTestHelper () {
     // Does nothing.

@@ -1,6 +1,9 @@
 <project name="junit" default="junit">
   <description>
   Provides the JUnit tool and the Hackystat JUnit sensor.
+    
+  To avoid sending all of the SimpleTelemetry scenario data to the test server, invoke as follows:
+    ant -DSimpleTelemetry.sendData=false -f junit.build.xml 
   </description>
 
   <import file="build.xml"/>
@@ -24,6 +27,7 @@
       <batchtest todir="${junit.dir}">
         <fileset dir="${src.dir}" includes="**/Test*.java"/>
       </batchtest>
+      <sysproperty key="org.hackystat.simdata.TestSimpleTelemetry.sendData" value="${SimpleTelemetry.sendData}"/>
     </junit>
   </target>  
 

@@ -20,6 +20,11 @@ import org.hackystat.utilities.tstamp.Tstamp;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Tests the SimpleTelemetry scenario by retrieving DPDs for the first day and ensuring their
+ * values are correct.
+ * @author Philip Johnson
+ */
 public class TestSimpleTelemetry extends SimDataTestHelper {
   
   private boolean invokedSimpleTelemetry = false;
@@ -66,50 +71,75 @@ public class TestSimpleTelemetry extends SimDataTestHelper {
         bobDevTime = data.getDevTime();
       }
     }
-    assertEquals("Checking Joe DevTime", 175, joeDevTime.intValue());
-    assertEquals("Checking Bob DevTime", 195, bobDevTime.intValue());
-    
-    // Check size for day 1.
-    FileMetricDailyProjectData fileMetric = client.getFileMetric(joe, project, day);
-    System.out.println(fileMetric.getTotalSizeMetricValue().intValue());
-    
+    assertEquals("Checking Joe DevTime", 180, joeDevTime.intValue());
+    assertEquals("Checking Bob DevTime", 200, bobDevTime.intValue());
+  
     // Check builds for day 1.
     BuildDailyProjectData builds = client.getBuild(joe, project, day);
-    System.out.println("Builds for: " + builds.getOwner() + " " + project);
-    for (org.hackystat.dailyprojectdata.resource.build.jaxb.MemberData memberData : builds.getMemberData()) {
-      String member = memberData.getMemberUri();
-      int failures = memberData.getFailure();
-      int success = memberData.getSuccess();
-      System.out.println(member + " " + failures + " " + success);
+    int joeBuilds = 0;
+    int bobBuilds = 0;
+    for (org.hackystat.dailyprojectdata.resource.build.jaxb.MemberData memberData : 
+      builds.getMemberData()) {
+      if (memberData.getMemberUri().contains(joe)) {
+        joeBuilds = memberData.getSuccess() + memberData.getFailure();
+      }
+      if (memberData.getMemberUri().contains(bob)) {
+        bobBuilds = memberData.getSuccess() + memberData.getFailure();
+      }
     }
+    assertEquals("Checking Joe Builds", 2, joeBuilds);
+    assertEquals("Checking Bob Builds", 5, bobBuilds);
+    
+    // Check size for day 1.
+    FileMetricDailyProjectData fileMetric = client.getFileMetric(bob, project, day);
+    assertEquals("Checking totalSize", 216, fileMetric.getTotalSizeMetricValue().intValue()); 
+
     
     // Check Unit Tests for day 1.
     UnitTestDailyProjectData tests = client.getUnitTest(joe, project, day);
-    System.out.println("UnitTests for: " + tests.getOwner() + " " + project);
-    for (org.hackystat.dailyprojectdata.resource.unittest.jaxb.MemberData memberData : tests.getMemberData()) {
-      String member = memberData.getMemberUri();
-      int failures = memberData.getFailure().intValue();
-      int success = memberData.getSuccess().intValue();
-      System.out.println(member + " " + failures + " " + success);
+    int joeTests = 0;
+    int bobTests = 0;
+    for (org.hackystat.dailyprojectdata.resource.unittest.jaxb.MemberData memberData : 
+      tests.getMemberData()) {
+      if (memberData.getMemberUri().contains(joe)) {
+        joeTests = memberData.getSuccess().intValue() + memberData.getFailure().intValue();
+      }
+      if (memberData.getMemberUri().contains(bob)) {
+        bobTests = memberData.getSuccess().intValue() + memberData.getFailure().intValue();
+      }
     }
+    assertEquals("Checking Joe Tests", 3, joeTests);
+    assertEquals("Checking Bob Tests", 3, bobTests);
     
     // Check commits for day 1.
     CommitDailyProjectData commits = client.getCommit(joe, project, day);
-    System.out.println("Commits for: " + tests.getOwner() + " " + project);
-    for (org.hackystat.dailyprojectdata.resource.commit.jaxb.MemberData memberData : commits.getMemberData()) {
-      String member = memberData.getMemberUri();
-      int numCommits = memberData.getCommits();
-      System.out.println(member + " " + numCommits);
+    int joeChurn = 0;
+    int bobChurn = 0;
+    for (org.hackystat.dailyprojectdata.resource.commit.jaxb.MemberData memberData : 
+      commits.getMemberData()) {
+      if (memberData.getMemberUri().contains(joe)) {
+        joeChurn = 
+          memberData.getLinesAdded() + memberData.getLinesChanged() + memberData.getLinesDeleted();
+      }
+      if (memberData.getMemberUri().contains(bob)) {
+        bobChurn = 
+          memberData.getLinesAdded() + memberData.getLinesChanged() + memberData.getLinesDeleted();
+      }
     }
+    assertEquals("Checking Joe Churn", 13, joeChurn);
+    assertEquals("Checking Bob Churn", 5, bobChurn);
+
 
     // Check Coverage for day 1.
     CoverageDailyProjectData coverage = client.getCoverage(joe, project, day, "line");
-    System.out.println("Coverage for: " + tests.getOwner() + " " + project);
-    for (org.hackystat.dailyprojectdata.resource.coverage.jaxb.ConstructData data : coverage.getConstructData()) {
-      String name = data.getName();
-      int covered = data.getNumCovered();
-      int uncovered = data.getNumUncovered();
-      System.out.println(name + " " + covered + " " + uncovered);
+    for (org.hackystat.dailyprojectdata.resource.coverage.jaxb.ConstructData data : 
+      coverage.getConstructData()) {
+      if (data.getName().contains("Joe.java")) {
+        assertEquals("Checking Joe.java coverage", 90, data.getNumCovered().intValue());
+      }
+      if (data.getName().contains("Bob.java")) {
+        assertEquals("Checking Bob.java coverage", 93, data.getNumCovered().intValue());
+      }
     }
   }
 }
