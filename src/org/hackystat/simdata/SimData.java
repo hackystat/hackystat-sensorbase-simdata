@@ -225,16 +225,14 @@ public class SimData {
    * @param user The user who owns this Commit.
    * @param tstamp The tstamp (and runtime) for this Commit.
    * @param file The resource.
-   * @param totalLines The total lines of code committed. 
    * @param linesAdded The number of lines added.
    * @param linesDeleted The number of lines deleted.
    * @throws SensorBaseClientException If problems occur. 
    */
-  public void addCommit(String user, XMLGregorianCalendar tstamp, String file, int totalLines, 
+  public void addCommit(String user, XMLGregorianCalendar tstamp, String file,
       int linesAdded, int linesDeleted)
   throws SensorBaseClientException {
     SensorData data = makeSensorData(user, "Commit", "Subversion", file, tstamp);
-    addProperty(data, "totalLines", String.valueOf(totalLines));
     addProperty(data, "linesAdded", String.valueOf(linesAdded));
     addProperty(data, "linesDeleted", String.valueOf(linesDeleted));
     clients.get(user).putSensorData(data);

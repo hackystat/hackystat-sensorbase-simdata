@@ -9,19 +9,30 @@ import org.hackystat.simdata.SimData;
 import org.hackystat.utilities.tstamp.Tstamp;
 
 /**
- * Illustrates simple use of Telemetry to understand development.  There are two developers, 
- * Joe and Bob, who are working on a Project in the "simpletelemetry" directory. Joe always works on
- * the file "Joe.java", and Bob always works on the file "Bob.java".   
- * This scenario creates four simulated Scrum "sprints", each lasting 1 week (5 days).
+ * Illustrates simple use of Telemetry to understand development. There are two developers, Joe and
+ * Bob, who are working on a Project in the "simpletelemetry" directory. Joe always works on the
+ * file "Joe.java", and Bob always works on the file "Bob.java". This scenario creates four
+ * simulated Scrum "sprints", each lasting 1 week (5 days).
  * <ul>
- * <li> Sprint 1: "Healthy" process and product measures.
- * <li> Sprint 2: "Late Start".
- * <li> Sprint 3: "High churn, falling coverage.
- * <li> Sprint 4: The freeloader.
+ * <li> Sprint 1: The "Healthy" project: nominal effort by both developers, consistently high
+ * coverage, regular builds, commits, and tests, low churn, gradually increasing coverage.
+ * <li> Sprint 2: The "Late Start": low effort, size, builds, tests, commits early in the week by
+ * both developers, then a sudden burst of activity at the very end. As a result, testing and
+ * coverage suffers.
+ * <li> Sprint 3: "Code Entropy": During this week, developers work consistently, but churn is high
+ * and test coverage is gradually falling. This is a kind of "early warning" that something is wrong
+ * with the project.
+ * <li> Spring 4: "Resource mismanagement": During this week, one developer is essentially idle, the
+ * other is putting in 12 hour days, a zillion commits, etc. Testing and coverage are low. This is
+ * an indication that project resources are not being allocated effectively. (I used to call this
+ * the "Freeloader" scenario, but it's unfair to assume that the "idle" developer is blowing off
+ * work. The idle developer might be working 12 hour days too, but just on non-development work. The
+ * real issue is that the second developer is over-committed, as evidenced by decreased testing and
+ * quality. )
  * </ul>
  * 
  * @author Philip Johnson
- *
+ * 
  */
 public class SimpleTelemetry {
   private SimData simData;
@@ -31,6 +42,7 @@ public class SimpleTelemetry {
   static String project = "simpletelemetry";
   static String startString = "2007-07-02";
   static String endString = "2007-08-01";
+  
   private XMLGregorianCalendar projectStart = Tstamp.makeTimestamp(startString); // Monday.
   private XMLGregorianCalendar projectEnd = Tstamp.makeTimestamp(endString);
   private String projectUriPattern = "*/" + project + "/*";
@@ -102,9 +114,9 @@ public class SimpleTelemetry {
       simData.addCoverage(joe, day, bobFile, (bobFileSize - bobUncovered), bobUncovered, day);
       
       // Joe commits twice a day, and Bob commits once, with relatively low churn (less than 20%).
-      simData.addCommit(joe, day, joeFile, random.nextInt(5), random.nextInt(5), random.nextInt(5));
-      simData.addCommit(joe, day, joeFile, random.nextInt(5), random.nextInt(5), random.nextInt(5));
-      simData.addCommit(bob, day, bobFile, random.nextInt(5), random.nextInt(5), random.nextInt(5));
+      simData.addCommit(joe, day, joeFile, random.nextInt(5), random.nextInt(5));
+      simData.addCommit(joe, day, joeFile, random.nextInt(5), random.nextInt(5));
+      simData.addCommit(bob, day, bobFile, random.nextInt(5), random.nextInt(5));
     }
   }
   
@@ -180,9 +192,9 @@ public class SimpleTelemetry {
       simData.addCoverage(joe, day, bobFile, bobCovered, (bobFileSize - bobCovered), day);
       
       // Lots of commits for last two days, with high churn.
-      simData.addCommit(joe, day, joeFile, random.nextInt(20), 
+      simData.addCommit(joe, day, joeFile,  
           random.nextInt(joeFileSize), random.nextInt(joeFileSize));
-      simData.addCommit(bob, day, bobFile, random.nextInt(20), 
+      simData.addCommit(bob, day, bobFile, 
           random.nextInt(bobFileSize), random.nextInt(bobFileSize));
     }
   }
@@ -226,15 +238,15 @@ public class SimpleTelemetry {
       simData.addCoverage(joe, day, bobFile, bobCovered, (bobFileSize - bobCovered), day);
       
       // Commits are regular and have high churn
-      simData.addCommit(joe, day, joeFile, joeFileSize - random.nextInt(20), 
+      simData.addCommit(joe, day, joeFile, 
           joeFileSize - random.nextInt(20), joeFileSize - random.nextInt(20));
-      simData.addCommit(bob, day, bobFile, bobFileSize - random.nextInt(20), 
+      simData.addCommit(bob, day, bobFile,  
           bobFileSize - random.nextInt(20), bobFileSize - random.nextInt(20));      
     }
   }
   
   /**
-   * Sprint 4: The freeloader.  Joe is doing all the work:
+   * Sprint 4: Resource mismanagement. Bob is idle, Joe is overworked.
    * <ul>
    * <li> Effort, size, builds, and unit tests are quite variable.
    * <li> Coverage shows a falling trend.
@@ -272,7 +284,7 @@ public class SimpleTelemetry {
       simData.addCoverage(joe, day, bobFile, bobCovered, (bobFileSize - bobCovered), day);
       
       // Bob doesn't even commit.
-      simData.addCommit(joe, day, joeFile, joeFileSize - random.nextInt(20), 
+      simData.addCommit(joe, day, joeFile,  
           joeFileSize - random.nextInt(20), joeFileSize - random.nextInt(20));
     }
   }

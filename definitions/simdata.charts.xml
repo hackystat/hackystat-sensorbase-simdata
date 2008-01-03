@@ -1,0 +1,49 @@
+<TelemetryDefinitions>
+
+<!-- Two charts that were defined originally to support the SimData Telemetry scenarios. -->
+
+<TelemetryDefinition Name="MemberTrends" DefinitionType="Chart" ShareScope="Global">
+  <Description>
+This chart provides a set of streams indicating a single project member's DevTime, Build
+counts, Unit Test invocations, Commits, and Churn. Data is non-cumulative over time.
+  </Description>
+
+  <SourceCode>
+<![CDATA[
+chart MemberTrends(member) = {
+  "DevTime, Build, UnitTest, Commit, and Churn for a single developer", 
+  (UnitTestStream("TotalCount", member, "false"), yAxis("UnitTest invocations")), 
+  (DevTimeStream(member, "false"), yAxis("DevTime hours")), 
+  (BuildStream(member, "*", "*", "false"), yAxis("Build invocations")), 
+  (CommitStream(member, "false"), yAxis("Commit counts")), 
+  (ChurnStream(member, "false"), yAxis("Churn counts")) 
+};
+]]>
+  </SourceCode>
+</TelemetryDefinition> 
+
+<!-- ************************************************************************************** -->
+
+<TelemetryDefinition Name="ProductTrends" DefinitionType="Chart" ShareScope="Global">
+  <Description>
+This chart provides a set of streams indicating Coverage, Size, Churn, Commit, UnitTest, Build, and 
+DevTime. All data is non-cumulative.
+  </Description>
+
+  <SourceCode>
+<![CDATA[
+chart ProductTrends() = {
+  "Coverage, Size, Churn, Commit, UnitTest, Build, and DevTime", 
+  (CoverageStream("Percentage", "line"), yAxis("Coverage percentage")),
+  (FileMetricStream("TotalLines"), yAxis("Total LOC")),
+  (ChurnStream("*", "false"), yAxis("Churn count")),
+  (CommitStream("*", "false"), yAxis("Commit count")),
+  (BuildStream("*", "*", "*", "false"), yAxis("Build invocations")),
+  (UnitTestStream("TotalCount", "*", "false"), yAxis("UnitTest invocations")),
+  (DevTimeStream("*", "false"), yAxis("DevTime hours"))
+};
+]]>
+  </SourceCode>
+</TelemetryDefinition> 
+
+</TelemetryDefinitions>

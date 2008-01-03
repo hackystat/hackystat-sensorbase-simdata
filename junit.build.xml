@@ -2,12 +2,15 @@
   <description>
   Provides the JUnit tool and the Hackystat JUnit sensor.
     
-  To avoid sending all of the SimpleTelemetry scenario data to the test server, invoke as follows:
-    ant -DSimpleTelemetry.sendData=false -f junit.build.xml 
+  To disable sending all of the SimpleTelemetry scenario data to the test server, invoke as follows:
+    ant -DSimpleTelemetry.sendData=false -f junit.build.xml
+    
   </description>
 
   <import file="build.xml"/>
   <property name="junit.dir" location="${build.dir}/junit" />
+
+  <property name="SimpleTelemetry.sendData" value="true" />
 
   <target name="junit" depends="junit.tool, junit.report, junit.sensor" description="Runs JUnit, JunitReport">
      <fail if="junit.failed">JUnit test case(s) failed.</fail>
