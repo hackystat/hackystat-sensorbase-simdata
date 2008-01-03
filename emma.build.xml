@@ -46,6 +46,7 @@
       </classpath>
       <sysproperty key="emma.coverage.out.file" value="${build.dir}/emma/coverage.emma" />
       <sysproperty key="emma.coverage.out.merge" value="true" />
+      <sysproperty key="org.hackystat.simdata.TestSimpleTelemetry.sendData" value="false"/>
       <formatter type="xml" />
       <batchtest todir="${junit.dir}">
         <fileset dir="${src.dir}">

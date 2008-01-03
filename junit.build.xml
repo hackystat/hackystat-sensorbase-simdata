@@ -10,7 +10,7 @@
   <import file="build.xml"/>
   <property name="junit.dir" location="${build.dir}/junit" />
 
-  <property name="SimpleTelemetry.sendData" value="true" />
+  <property name="SimpleTelemetry.sendData" value="false" />
 
   <target name="junit" depends="junit.tool, junit.report, junit.sensor" description="Runs JUnit, JunitReport">
      <fail if="junit.failed">JUnit test case(s) failed.</fail>
