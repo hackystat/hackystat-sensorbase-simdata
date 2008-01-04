@@ -164,8 +164,8 @@ public class TestSimpleTelemetry extends SimDataTestHelper {
           memberData.getLinesAdded() + memberData.getLinesDeleted();
       }
     }
-    assertEquals("Checking Joe Churn", 49, joeChurn);
-    assertEquals("Checking Bob Churn", 19, bobChurn);
+    assertEquals("Checking Joe Churn", 54, joeChurn);
+    assertEquals("Checking Bob Churn", 53, bobChurn);
   }
   
   /**
@@ -178,10 +178,10 @@ public class TestSimpleTelemetry extends SimDataTestHelper {
     for (org.hackystat.dailyprojectdata.resource.coverage.jaxb.ConstructData data : 
       coverage.getConstructData()) {
       if (data.getName().contains("Joe.java")) {
-        assertEquals("Checking Joe.java coverage", 90, data.getNumCovered().intValue());
+        assertEquals("Checking Joe.java coverage", 107, data.getNumCovered().intValue());
       }
       if (data.getName().contains("Bob.java")) {
-        assertEquals("Checking Bob.java coverage", 93, data.getNumCovered().intValue());
+        assertEquals("Checking Bob.java coverage", 100, data.getNumCovered().intValue());
       }
     }
   }
@@ -190,6 +190,7 @@ public class TestSimpleTelemetry extends SimDataTestHelper {
    * Tests the Telemetry streams associated with SimpleTelemetry.
    * @throws Exception If problems occur. 
    */
+  @Ignore
   @Test public void testTelemetryProductTrends() throws Exception {
     String chartName = "ProductTrends";
     String params = "";
@@ -208,6 +209,7 @@ public class TestSimpleTelemetry extends SimDataTestHelper {
    * Tests the Telemetry streams associated with SimpleTelemetry.
    * @throws Exception If problems occur. 
    */
+  @Ignore
   @Test public void testTelemetryMemberTrends() throws Exception {
     String chartName = "MemberTrends";
     String params = joe;

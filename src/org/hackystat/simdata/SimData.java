@@ -221,21 +221,48 @@ public class SimData {
   }
   
   /**
-   * Adds a single Commit sensor data instance. 
+   * Adds a single Commit sensor data instance with an associated churn value.
+   * Pass the target churn as an int, which will be divided between lines added and deleted.
    * @param user The user who owns this Commit.
    * @param tstamp The tstamp (and runtime) for this Commit.
    * @param file The resource.
-   * @param linesAdded The number of lines added.
-   * @param linesDeleted The number of lines deleted.
-   * @throws SensorBaseClientException If problems occur. 
+   * @param churn The total churn (lines added plus deleted).
+   * @throws Exception If problems occur. 
    */
-  public void addCommit(String user, XMLGregorianCalendar tstamp, String file,
-      int linesAdded, int linesDeleted)
-  throws SensorBaseClientException {
+  public void addCommit(String user, XMLGregorianCalendar tstamp, String file, int churn) 
+  throws Exception {
+    int linesAdded = (int)(churn * 0.50);
+    int linesDeleted = churn - linesAdded;
     SensorData data = makeSensorData(user, "Commit", "Subversion", file, tstamp);
     addProperty(data, "linesAdded", String.valueOf(linesAdded));
     addProperty(data, "linesDeleted", String.valueOf(linesDeleted));
     clients.get(user).putSensorData(data);
+  }
+  
+  /**
+   * Adds multiple Commit sensor data instances. The churn is divided among them.
+   * Pass the target churn as an int, which will be divided between lines added and deleted.
+   * Churn must be more than twice the number of commits.
+   * @param user The user who owns this Commit.
+   * @param tstamp The tstamp (and runtime) for this Commit.
+   * @param file The resource.
+   * @param churn The total churn (lines added plus deleted).
+   * @param numCommits The number of commit instances to create.
+   * @throws Exception If problems occur. 
+   */
+  public void addCommits(String user, XMLGregorianCalendar tstamp, String file, int churn, 
+      int numCommits) throws Exception {
+    if (churn <= (numCommits * 2)) {
+      throw new Exception("Churn must be more than twice the number of commits.");
+    }
+    // Churn / Commits is the churn per commit value. Divide that equally among the added/deleted.
+    int linesAddedOrDeleted = (int)((churn / (double)numCommits) / 2.0);
+    for (int i = 0; i < numCommits; i++) {
+      SensorData data = makeSensorData(user, "Commit", "Subversion", file, tstamp);
+      addProperty(data, "linesAdded", String.valueOf(linesAddedOrDeleted));
+      addProperty(data, "linesDeleted", String.valueOf(linesAddedOrDeleted));
+      clients.get(user).putSensorData(data);
+    }
   }
   
   /**
@@ -276,17 +303,25 @@ public class SimData {
   }
   
   /**
-   * Adds a single Coverage sensor data instance with line-level coverage only. 
+   * Adds a single Coverage sensor data instance with line-level coverage only.
+   * Pass the target percentage coverage and the total lines of code, and this method will
+   * determine the number of covered and uncovered lines that provide the desired 
+   * line-level coverage (or as close as possible).
    * @param user The user who owns this FileMetric.
    * @param tstamp The tstamp (and runtime) for this FileMetric.
    * @param file The resource.
-   * @param uncovered The number of uncovered lines.
-   * @param covered The number of covered lines.
+   * @param percent The target coverage percentage, as a number between 0 and 100.
+   * @param loc The total lines of code.  
    * @param runtime The runtime. 
-   * @throws SensorBaseClientException If problems occur. 
+   * @throws Exception If problems occur, or if percent is not between 0 and 100.
    */
-  public void addCoverage(String user, XMLGregorianCalendar tstamp, String file, int covered, 
-      int uncovered, XMLGregorianCalendar runtime) throws SensorBaseClientException {
+  public void addCoverage(String user, XMLGregorianCalendar tstamp, String file, int percent, 
+      int loc, XMLGregorianCalendar runtime) throws Exception {
+    if ((percent < 0) || (percent > 100)) {
+      throw new Exception("Percent must be between 0 and 100");
+    }
+    int covered = (int)(loc * (percent / 100.0));
+    int uncovered = loc - covered;
     SensorData data = makeSensorData(user, "Coverage", "Emma", file, tstamp, runtime);
     addProperty(data, "line_Covered", String.valueOf(covered));
     addProperty(data, "line_Uncovered", String.valueOf(uncovered));

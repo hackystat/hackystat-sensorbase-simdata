@@ -4,7 +4,6 @@ import java.util.Random;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.hackystat.sensorbase.client.SensorBaseClientException;
 import org.hackystat.simdata.SimData;
 import org.hackystat.utilities.tstamp.Tstamp;
 
@@ -84,9 +83,9 @@ public class SimpleTelemetry {
    * <li> Coverage is always at least 80%.
    * <li> They each commit once a day, with relatively low churn (less than 20%).
    * </ul>
-   * @throws SensorBaseClientException If problems occur.
+   * @throws Exception If problems occur.
    */
-  private void makeSprint1() throws SensorBaseClientException {
+  private void makeSprint1() throws Exception {
     for (int i = 0; i < 5; i++) {
       XMLGregorianCalendar day = Tstamp.incrementDays(projectStart, i);
       this.simData.getLogger().info(LOGPREFIX + day);
@@ -95,7 +94,7 @@ public class SimpleTelemetry {
       this.simData.addDevEvents(joe, day, (12 * 3) + random.nextInt(12), joeFile);
       this.simData.addDevEvents(bob, day, (12 * 3) + random.nextInt(12), bobFile);
       
-      // Size increases steadily, starting at about 100 and increasing by 10 or so lines per day.
+      // Size increases steadily, starting at about 100 and increasing by 50-60 LOC per day.
       int joeFileSize = 100 + (i * 50) + random.nextInt(10); 
       int bobFileSize = 100 + (i * 50) + random.nextInt(10); 
       simData.addFileMetric(joe, day, joeFile, joeFileSize, day);
@@ -108,15 +107,15 @@ public class SimpleTelemetry {
       simData.addUnitTests(bob, day, bobFile, PASS, 2 + random.nextInt(5));
       
       // Coverage is always at least 80%.
-      int joeUncovered = random.nextInt(20);
-      int bobUncovered = random.nextInt(20);
-      simData.addCoverage(joe, day, joeFile, (joeFileSize - joeUncovered), joeUncovered, day);
-      simData.addCoverage(joe, day, bobFile, (bobFileSize - bobUncovered), bobUncovered, day);
+      int joeCoverage = 80 + random.nextInt(20);
+      int bobCoverage = 80 + random.nextInt(20);
+      simData.addCoverage(joe, day, joeFile, joeCoverage, joeFileSize,  day);
+      simData.addCoverage(joe, day, bobFile, bobCoverage, bobFileSize, day);
       
-      // Joe commits twice a day, and Bob commits once, with relatively low churn (less than 20%).
-      simData.addCommit(joe, day, joeFile, (i * 20) + random.nextInt(20), random.nextInt(20));
-      simData.addCommit(joe, day, joeFile, (i * 20) + random.nextInt(20), random.nextInt(20));
-      simData.addCommit(bob, day, bobFile, (i * 20) + random.nextInt(20), random.nextInt(20));
+      // Joe commits twice a day, and Bob commits once, with relatively low churn (50-60 LOC).
+      simData.addCommit(joe, day, joeFile, 20 + random.nextInt(10));
+      simData.addCommit(joe, day, joeFile, 20 + random.nextInt(10));
+      simData.addCommit(bob, day, bobFile, 50 + random.nextInt(10));
     }
   }
   
@@ -129,9 +128,9 @@ public class SimpleTelemetry {
    * <li> Coverage is very low for first three days, never gets high.
    * <li> No commits for first three days, then many in last two. High churn each time.
    * </ul>
-   * @throws SensorBaseClientException If problems occur.
+   * @throws Exception If problems occur.
    */
-  private void makeSprint2() throws SensorBaseClientException {
+  private void makeSprint2() throws Exception {
     // Move forward 7 days to start the second sprint.
     int dayOffset = 7;
     // Do first three days of sprint in one loop.
@@ -156,12 +155,12 @@ public class SimpleTelemetry {
       simData.addUnitTests(bob, day, bobFile, PASS, 0 + random.nextInt(1));
       
       // Coverage is high, because very low code size.%
-      int joeCovered = 70 + random.nextInt(5);
-      int bobCovered = 70 + random.nextInt(5);
-      simData.addCoverage(joe, day, joeFile, joeCovered, 50, day);
-      simData.addCoverage(joe, day, bobFile, bobCovered, 50, day);
+      int joeCoverage = 70 + random.nextInt(5);
+      int bobCoverage = 70 + random.nextInt(5);
+      simData.addCoverage(joe, day, joeFile, joeCoverage, joeFileSize, day);
+      simData.addCoverage(joe, day, bobFile, bobCoverage, bobFileSize, day);
       
-      // No commits for first three days.
+      // No commits or churn for first three days.
     }
     
     // Now do last two days.
@@ -173,9 +172,9 @@ public class SimpleTelemetry {
       this.simData.addDevEvents(joe, day, (12 * 8) + random.nextInt(12 * 2), joeFile);
       this.simData.addDevEvents(bob, day, (12 * 8) + random.nextInt(12 * 2), bobFile);
       
-      // Size increases dramatically, by 200 or so lines per day.
-      int joeFileSize = ((i - dayOffset) * 50) +  random.nextInt(50); 
-      int bobFileSize = ((i - dayOffset) * 50) + random.nextInt(50); 
+      // Size increases dramatically, by a total of around 300 or so lines per day.
+      int joeFileSize = ((i - dayOffset) * 150) +  random.nextInt(10); 
+      int bobFileSize = ((i - dayOffset) * 150) + random.nextInt(10); 
       simData.addFileMetric(joe, day, joeFile, joeFileSize, day);
       simData.addFileMetric(joe, day, bobFile, bobFileSize, day);
       
@@ -185,17 +184,15 @@ public class SimpleTelemetry {
       simData.addUnitTests(joe, day, joeFile, PASS, 20 + random.nextInt(20));
       simData.addUnitTests(bob, day, bobFile, PASS, 20 + random.nextInt(20));
       
-      // Coverage is around 40%
-      int joeCovered = 30 + random.nextInt(20);
-      int bobCovered = 30 + random.nextInt(20);
-      simData.addCoverage(joe, day, joeFile, joeCovered, 100, day);
-      simData.addCoverage(joe, day, bobFile, bobCovered, 100, day);
+      // Coverage drops to around 40%
+      int joeCoverage = 30 + random.nextInt(10);
+      int bobCoverage = 30 + random.nextInt(10);
+      simData.addCoverage(joe, day, joeFile, joeCoverage, joeFileSize, day);
+      simData.addCoverage(joe, day, bobFile, bobCoverage, bobFileSize, day);
       
       // Lots of commits for last two days, with high churn.
-      simData.addCommit(joe, day, joeFile,  
-          random.nextInt(joeFileSize / 8), random.nextInt(joeFileSize / 8));
-      simData.addCommit(bob, day, bobFile, 
-          random.nextInt(bobFileSize / 8), random.nextInt(bobFileSize / 8));
+      simData.addCommits(joe, day, joeFile, 200 + random.nextInt(10), 5 + random.nextInt(5));  
+      simData.addCommits(bob, day, bobFile, 200 + random.nextInt(10), 5 + random.nextInt(5));  
     }
   }
   
@@ -206,9 +203,9 @@ public class SimpleTelemetry {
    * <li> Coverage shows a falling trend.
    * <li> High churn on commits.
    * </ul>
-   * @throws SensorBaseClientException If problems occur.
+   * @throws Exception If problems occur.
    */
-  private void makeSprint3() throws SensorBaseClientException {
+  private void makeSprint3() throws Exception {
     // Move forward 14 days to start Sprint 3.
     int dayOffset = 14;
     for (int i = dayOffset + 0; i < dayOffset + 5; i++) {
@@ -220,28 +217,26 @@ public class SimpleTelemetry {
       this.simData.addDevEvents(bob, day, 0 + random.nextInt(12 * 8), bobFile);
       
       // Size is variable but has slight upward trend.
-      int joeFileSize = 200 + ((i - dayOffset) * 20) + random.nextInt(100); 
-      int bobFileSize = 200 + ((i - dayOffset) * 20) + random.nextInt(100); 
+      int joeFileSize = 200 + ((i - dayOffset) * 50) + random.nextInt(20); 
+      int bobFileSize = 200 + ((i - dayOffset) * 50) + random.nextInt(20); 
       simData.addFileMetric(joe, day, joeFile, joeFileSize, day);
       simData.addFileMetric(joe, day, bobFile, bobFileSize, day);
       
-      // Builds and unit tests between 0-10 times a day.
-      simData.addBuilds(joe, day, joeDir, SUCCESS, 0 + random.nextInt(10));
-      simData.addBuilds(bob, day, bobDir, SUCCESS, 0 + random.nextInt(10));
-      simData.addUnitTests(joe, day, joeFile, PASS, 0 + random.nextInt(10));
-      simData.addUnitTests(bob, day, bobFile, PASS, 0 + random.nextInt(10));
+      // Builds and unit tests are low; 0-2 times a day
+      simData.addBuilds(joe, day, joeDir, SUCCESS, 0 + random.nextInt(2));
+      simData.addBuilds(bob, day, bobDir, SUCCESS, 0 + random.nextInt(2));
+      simData.addUnitTests(joe, day, joeFile, PASS, 0 + random.nextInt(2));
+      simData.addUnitTests(bob, day, bobFile, PASS, 0 + random.nextInt(2));
       
       // Coverage starts out about 90%, but falls 10% per day with a little random jiggle.
-      int joeCovered = 90 - ((i - dayOffset) * 10) + random.nextInt(3);
-      int bobCovered = 90 - ((i - dayOffset) * 10) + random.nextInt(3);
-      simData.addCoverage(joe, day, joeFile, joeCovered, 50, day);
-      simData.addCoverage(joe, day, bobFile, bobCovered, 50, day);
+      int joeCoverage = 90 - ((i - dayOffset) * 10) + random.nextInt(3);
+      int bobCoverage = 90 - ((i - dayOffset) * 10) + random.nextInt(3);
+      simData.addCoverage(joe, day, joeFile, joeCoverage, joeFileSize, day);
+      simData.addCoverage(joe, day, bobFile, bobCoverage, bobFileSize, day);
       
       // Commits are regular and have high churn
-      simData.addCommit(joe, day, joeFile, 
-          (joeFileSize / 2) + random.nextInt(joeFileSize / 4), random.nextInt(joeFileSize / 4));
-      simData.addCommit(bob, day, bobFile,  
-          random.nextInt(bobFileSize / 4), random.nextInt(bobFileSize / 4));      
+      simData.addCommits(joe, day, joeFile, 200 + random.nextInt(10), 2 + random.nextInt(2)); 
+      simData.addCommits(bob, day, bobFile, 200 + random.nextInt(10), 2 + random.nextInt(2)); 
     }
   }
   
@@ -251,9 +246,9 @@ public class SimpleTelemetry {
    * <li> Effort, size, builds, and unit tests are quite variable.
    * <li> Coverage shows a falling trend.
    * <li> High churn on commits.
-   * @throws SensorBaseClientException If problems occur.
+   * @throws Exception If problems occur.
    */
-  private void makeSprint4() throws SensorBaseClientException {
+  private void makeSprint4() throws Exception {
     // Move forward 21 days to start Sprint 4.
     int dayOffset = 21;
     for (int i = dayOffset + 0; i < dayOffset + 5; i++) {
@@ -277,15 +272,15 @@ public class SimpleTelemetry {
       simData.addUnitTests(joe, day, joeFile, PASS, 10 + random.nextInt(2));
       simData.addUnitTests(bob, day, bobFile, PASS, 0 + random.nextInt(1));
       
-      // Coverage starts out about 90%, but falls 10% per day with a little random jiggle.
-      int joeCovered = 70 + random.nextInt(10);
-      int bobCovered = 10 + random.nextInt(3);
-      simData.addCoverage(joe, day, joeFile, joeCovered, 100, day);
-      simData.addCoverage(joe, day, bobFile, bobCovered, 100, day);
+      // Coverage stays low.
+      int joeCoverage = 30 + random.nextInt(10);
+      int bobCoverage = 10 + random.nextInt(3);
+      simData.addCoverage(joe, day, joeFile, joeCoverage, joeFileSize, day);
+      simData.addCoverage(joe, day, bobFile, bobCoverage, bobFileSize, day);
       
       // Bob doesn't even commit, joe has a commit with lots of churn.
-      simData.addCommit(joe, day, joeFile,  
-          joeFileSize + random.nextInt(joeFileSize / 8), random.nextInt(joeFileSize / 8));
+      simData.addCommits(joe, day, joeFile, joeFileSize + random.nextInt(20), 
+          5 + random.nextInt(5));  
     }
   }
 }
