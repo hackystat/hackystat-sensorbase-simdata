@@ -96,8 +96,8 @@ public class SimpleTelemetry {
       this.simData.addDevEvents(bob, day, (12 * 3) + random.nextInt(12), bobFile);
       
       // Size increases steadily, starting at about 100 and increasing by 10 or so lines per day.
-      int joeFileSize = 100 + (i * 10) + random.nextInt(10); 
-      int bobFileSize = 100 + (i * 10) + random.nextInt(10); 
+      int joeFileSize = 100 + (i * 50) + random.nextInt(10); 
+      int bobFileSize = 100 + (i * 50) + random.nextInt(10); 
       simData.addFileMetric(joe, day, joeFile, joeFileSize, day);
       simData.addFileMetric(joe, day, bobFile, bobFileSize, day);
       
@@ -114,9 +114,9 @@ public class SimpleTelemetry {
       simData.addCoverage(joe, day, bobFile, (bobFileSize - bobUncovered), bobUncovered, day);
       
       // Joe commits twice a day, and Bob commits once, with relatively low churn (less than 20%).
-      simData.addCommit(joe, day, joeFile, random.nextInt(5), random.nextInt(5));
-      simData.addCommit(joe, day, joeFile, random.nextInt(5), random.nextInt(5));
-      simData.addCommit(bob, day, bobFile, random.nextInt(5), random.nextInt(5));
+      simData.addCommit(joe, day, joeFile, (i * 20) + random.nextInt(20), random.nextInt(20));
+      simData.addCommit(joe, day, joeFile, (i * 20) + random.nextInt(20), random.nextInt(20));
+      simData.addCommit(bob, day, bobFile, (i * 20) + random.nextInt(20), random.nextInt(20));
     }
   }
   
@@ -155,11 +155,11 @@ public class SimpleTelemetry {
       simData.addUnitTests(joe, day, joeFile, PASS, 0 + random.nextInt(1));
       simData.addUnitTests(bob, day, bobFile, PASS, 0 + random.nextInt(1));
       
-      // Coverage is 0 - 10%
-      int joeCovered = random.nextInt(10);
-      int bobCovered = random.nextInt(10);
-      simData.addCoverage(joe, day, joeFile, joeCovered, (joeFileSize - joeCovered), day);
-      simData.addCoverage(joe, day, bobFile, bobCovered, (bobFileSize - bobCovered), day);
+      // Coverage is high, because very low code size.%
+      int joeCovered = 70 + random.nextInt(5);
+      int bobCovered = 70 + random.nextInt(5);
+      simData.addCoverage(joe, day, joeFile, joeCovered, 50, day);
+      simData.addCoverage(joe, day, bobFile, bobCovered, 50, day);
       
       // No commits for first three days.
     }
@@ -174,8 +174,8 @@ public class SimpleTelemetry {
       this.simData.addDevEvents(bob, day, (12 * 8) + random.nextInt(12 * 2), bobFile);
       
       // Size increases dramatically, by 200 or so lines per day.
-      int joeFileSize = (i * 100) +  random.nextInt(200); 
-      int bobFileSize = (i * 100) + random.nextInt(200); 
+      int joeFileSize = ((i - dayOffset) * 50) +  random.nextInt(50); 
+      int bobFileSize = ((i - dayOffset) * 50) + random.nextInt(50); 
       simData.addFileMetric(joe, day, joeFile, joeFileSize, day);
       simData.addFileMetric(joe, day, bobFile, bobFileSize, day);
       
@@ -188,14 +188,14 @@ public class SimpleTelemetry {
       // Coverage is around 40%
       int joeCovered = 30 + random.nextInt(20);
       int bobCovered = 30 + random.nextInt(20);
-      simData.addCoverage(joe, day, joeFile, joeCovered, (joeFileSize - joeCovered), day);
-      simData.addCoverage(joe, day, bobFile, bobCovered, (bobFileSize - bobCovered), day);
+      simData.addCoverage(joe, day, joeFile, joeCovered, 100, day);
+      simData.addCoverage(joe, day, bobFile, bobCovered, 100, day);
       
       // Lots of commits for last two days, with high churn.
       simData.addCommit(joe, day, joeFile,  
-          random.nextInt(joeFileSize), random.nextInt(joeFileSize));
+          random.nextInt(joeFileSize / 8), random.nextInt(joeFileSize / 8));
       simData.addCommit(bob, day, bobFile, 
-          random.nextInt(bobFileSize), random.nextInt(bobFileSize));
+          random.nextInt(bobFileSize / 8), random.nextInt(bobFileSize / 8));
     }
   }
   
@@ -220,8 +220,8 @@ public class SimpleTelemetry {
       this.simData.addDevEvents(bob, day, 0 + random.nextInt(12 * 8), bobFile);
       
       // Size is variable but has slight upward trend.
-      int joeFileSize = 200 + (i * 20) + random.nextInt(100); 
-      int bobFileSize = 200 + (i * 20) + random.nextInt(100); 
+      int joeFileSize = 200 + ((i - dayOffset) * 20) + random.nextInt(100); 
+      int bobFileSize = 200 + ((i - dayOffset) * 20) + random.nextInt(100); 
       simData.addFileMetric(joe, day, joeFile, joeFileSize, day);
       simData.addFileMetric(joe, day, bobFile, bobFileSize, day);
       
@@ -232,16 +232,16 @@ public class SimpleTelemetry {
       simData.addUnitTests(bob, day, bobFile, PASS, 0 + random.nextInt(10));
       
       // Coverage starts out about 90%, but falls 10% per day with a little random jiggle.
-      int joeCovered = 90 - (i * 10) + random.nextInt(3);
-      int bobCovered = 90 - (i * 10) + random.nextInt(3);
-      simData.addCoverage(joe, day, joeFile, joeCovered, (joeFileSize - joeCovered), day);
-      simData.addCoverage(joe, day, bobFile, bobCovered, (bobFileSize - bobCovered), day);
+      int joeCovered = 90 - ((i - dayOffset) * 10) + random.nextInt(3);
+      int bobCovered = 90 - ((i - dayOffset) * 10) + random.nextInt(3);
+      simData.addCoverage(joe, day, joeFile, joeCovered, 50, day);
+      simData.addCoverage(joe, day, bobFile, bobCovered, 50, day);
       
       // Commits are regular and have high churn
       simData.addCommit(joe, day, joeFile, 
-          joeFileSize - random.nextInt(20), joeFileSize - random.nextInt(20));
+          (joeFileSize / 2) + random.nextInt(joeFileSize / 4), random.nextInt(joeFileSize / 4));
       simData.addCommit(bob, day, bobFile,  
-          bobFileSize - random.nextInt(20), bobFileSize - random.nextInt(20));      
+          random.nextInt(bobFileSize / 4), random.nextInt(bobFileSize / 4));      
     }
   }
   
@@ -266,8 +266,8 @@ public class SimpleTelemetry {
       this.simData.addDevEvents(bob, day, 0 + random.nextInt(12), bobFile);
       
       // Joe: size is variable, moving upward fast. Bob: not much size increase.
-      int joeFileSize = 10 + (i * 40) + random.nextInt(20); 
-      int bobFileSize = 10 + (i * 2) + random.nextInt(2); 
+      int joeFileSize = 10 + ((i - dayOffset) * 100) + random.nextInt(20); 
+      int bobFileSize = 10 + ((i - dayOffset) * 2) + random.nextInt(2); 
       simData.addFileMetric(joe, day, joeFile, joeFileSize, day);
       simData.addFileMetric(joe, day, bobFile, bobFileSize, day);
       
@@ -280,12 +280,12 @@ public class SimpleTelemetry {
       // Coverage starts out about 90%, but falls 10% per day with a little random jiggle.
       int joeCovered = 70 + random.nextInt(10);
       int bobCovered = 10 + random.nextInt(3);
-      simData.addCoverage(joe, day, joeFile, joeCovered, (joeFileSize - joeCovered), day);
-      simData.addCoverage(joe, day, bobFile, bobCovered, (bobFileSize - bobCovered), day);
+      simData.addCoverage(joe, day, joeFile, joeCovered, 100, day);
+      simData.addCoverage(joe, day, bobFile, bobCovered, 100, day);
       
-      // Bob doesn't even commit.
+      // Bob doesn't even commit, joe has a commit with lots of churn.
       simData.addCommit(joe, day, joeFile,  
-          joeFileSize - random.nextInt(20), joeFileSize - random.nextInt(20));
+          joeFileSize + random.nextInt(joeFileSize / 8), random.nextInt(joeFileSize / 8));
     }
   }
 }
