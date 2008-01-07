@@ -1,6 +1,6 @@
 <TelemetryDefinitions>
 
-<!-- Two charts that were defined originally to support the SimData Telemetry scenarios. -->
+<!-- These charts are designed to support the SimData Simple Telemetry scenarios. -->
 
 <TelemetryDefinition Name="MemberTrends" DefinitionType="Chart" ShareScope="Global">
   <Description>
@@ -24,23 +24,41 @@ chart MemberTrends(member) = {
 
 <!-- ************************************************************************************** -->
 
-<TelemetryDefinition Name="ProductTrends" DefinitionType="Chart" ShareScope="Global">
+<TelemetryDefinition Name="ProductDevTrends" DefinitionType="Chart" ShareScope="Global">
   <Description>
-This chart provides a set of streams indicating Coverage, Size, Churn, Commit, UnitTest, Build, and 
+This chart provides insight into product development trends including: Size, Churn, Commit, Build, and 
 DevTime. All data is non-cumulative.
   </Description>
 
   <SourceCode>
 <![CDATA[
-chart ProductTrends() = {
-  "Coverage, Size, Churn, Commit, UnitTest, Build, and DevTime", 
-  (CoverageStream("Percentage", "line"), yAxis("Coverage percentage")),
+chart ProductDevTrends() = {
+  "Coverage, Size, Churn, Commit, UnitTest, Build, CodeIssue, and DevTime", 
   (FileMetricStream("TotalLines"), yAxis("Total LOC")),
   (ChurnStream("*", "false"), yAxis("Churn count")),
   (CommitStream("*", "false"), yAxis("Commit count")),
   (BuildStream("*", "*", "*", "false"), yAxis("Build invocations")),
-  (UnitTestStream("TotalCount", "*", "false"), yAxis("UnitTest invocations")),
   (DevTimeStream("*", "false"), yAxis("DevTime hours"))
+};
+]]>
+  </SourceCode>
+</TelemetryDefinition> 
+
+<!-- ************************************************************************************** -->
+
+<TelemetryDefinition Name="ProductQATrends" DefinitionType="Chart" ShareScope="Global">
+  <Description>
+This chart provides insight into product quality assurance trends including: Coverage, Test Invocations, and 
+Code Issues. All data is non-cumulative.
+  </Description>
+
+  <SourceCode>
+<![CDATA[
+chart ProductQATrends() = {
+  "Coverage, Size, Churn, Commit, UnitTest, Build, CodeIssue, and DevTime", 
+  (CoverageStream("Percentage", "line"), yAxis("Coverage percentage")),
+  (UnitTestStream("TotalCount", "*", "false"), yAxis("UnitTest invocations")),
+  (CodeIssueStream("*", "*"), yAxis("CodeIssue counts"))
 };
 ]]>
   </SourceCode>

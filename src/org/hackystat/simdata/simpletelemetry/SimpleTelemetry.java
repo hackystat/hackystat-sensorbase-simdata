@@ -81,6 +81,7 @@ public class SimpleTelemetry {
    * <li> Size increases steadily, starting at about 100 and increasing by 10 or so lines per day.
    * <li> Builds and unit tests between 2-6 times a day.
    * <li> Coverage is always at least 80%.
+   * <li> CodeIssues is stable and low, between 5 and 10 per file.
    * <li> They each commit once a day, with relatively low churn (less than 20%).
    * </ul>
    * @throws Exception If problems occur.
@@ -116,6 +117,10 @@ public class SimpleTelemetry {
       simData.addCommit(joe, day, joeFile, 20 + random.nextInt(10));
       simData.addCommit(joe, day, joeFile, 20 + random.nextInt(10));
       simData.addCommit(bob, day, bobFile, 50 + random.nextInt(10));
+      
+      // Code issues are low and stable, between 0 and 4 per file.
+      simData.addCodeIssues(joe, day, joeFile, random.nextInt(4));
+      simData.addCodeIssues(bob, day, bobFile, random.nextInt(4));
     }
   }
   
@@ -127,6 +132,7 @@ public class SimpleTelemetry {
    * <li> Builds and unit tests very low for first three days, then high.
    * <li> Coverage is very low for first three days, never gets high.
    * <li> No commits for first three days, then many in last two. High churn each time.
+   * <li>> High code issues in last two days, between 10 and 20 per file.
    * </ul>
    * @throws Exception If problems occur.
    */
@@ -193,15 +199,20 @@ public class SimpleTelemetry {
       // Lots of commits for last two days, with high churn.
       simData.addCommits(joe, day, joeFile, 200 + random.nextInt(10), 5 + random.nextInt(5));  
       simData.addCommits(bob, day, bobFile, 200 + random.nextInt(10), 5 + random.nextInt(5));  
+      
+      // Code issues are high for last two days.
+      simData.addCodeIssues(joe, day, joeFile, 20 + random.nextInt(5));
+      simData.addCodeIssues(bob, day, bobFile, 20 + random.nextInt(5));
     }
   }
   
   /**
-   * Sprint 3: High churn and falling coverage indicate a project in trouble.
+   * Sprint 3: High churn, falling coverage, and increasing code issues indicate a trouble project.
    * <ul>
    * <li> Effort, size, builds, and unit tests are quite variable.
    * <li> Coverage shows a falling trend.
    * <li> High churn on commits.
+   * <li> Code issues steadily rising.
    * </ul>
    * @throws Exception If problems occur.
    */
@@ -237,6 +248,11 @@ public class SimpleTelemetry {
       // Commits are regular and have high churn
       simData.addCommits(joe, day, joeFile, 200 + random.nextInt(10), 2 + random.nextInt(2)); 
       simData.addCommits(bob, day, bobFile, 200 + random.nextInt(10), 2 + random.nextInt(2)); 
+      
+      // Code Issues steadily rising by about 10 per day per file.
+      simData.addCodeIssues(joe, day, joeFile, ((i - dayOffset) * 8)  + random.nextInt(5));
+      simData.addCodeIssues(bob, day, bobFile, ((i - dayOffset) * 8) + random.nextInt(5));
+      
     }
   }
   
@@ -281,6 +297,9 @@ public class SimpleTelemetry {
       // Bob doesn't even commit, joe has a commit with lots of churn.
       simData.addCommits(joe, day, joeFile, joeFileSize + random.nextInt(20), 
           5 + random.nextInt(5));  
+      
+      // Code Issues are high and rising.
+      simData.addCodeIssues(joe, day, joeFile, 30 + ((i - dayOffset) * 2)  + random.nextInt(2));
     }
   }
 }

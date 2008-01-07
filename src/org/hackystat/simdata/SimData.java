@@ -203,6 +203,21 @@ public class SimData {
   }
   
   /**
+   * Sends a single CodeIssue instance with the specified number of CodeIssues to the SensorBase.
+   * @param user The user who will own these CodeIssues.
+   * @param tstamp The timestamp.
+   * @param file The file to be used as the resource.
+   * @param numIssues The total number of CodeIssues in this instance.
+   * @throws SensorBaseClientException If problems occur.
+   */
+  public void addCodeIssues(String user, XMLGregorianCalendar tstamp, String file, int numIssues) 
+  throws SensorBaseClientException {
+    SensorData data = makeSensorData(user, "CodeIssue", "FindBugs", file, tstamp);
+    addProperty(data, "Type_NPE", String.valueOf(numIssues));
+    clients.get(user).putSensorData(data);
+  }
+  
+  /**
    * Adds a single FileMetric sensor data instance. 
    * @param user The user who owns this FileMetric.
    * @param tstamp The tstamp (and runtime) for this FileMetric.
