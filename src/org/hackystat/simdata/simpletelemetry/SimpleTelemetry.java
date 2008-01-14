@@ -11,17 +11,17 @@ import org.hackystat.utilities.tstamp.Tstamp;
  * Illustrates simple use of Telemetry to understand development. There are two developers, Joe and
  * Bob, who are working on a Project in the "simpletelemetry" directory. Joe always works on the
  * file "Joe.java", and Bob always works on the file "Bob.java". This scenario creates four
- * simulated Scrum "sprints", each lasting 1 week (5 days).
+ * simulated Scrum "sprints", each lasting 10 days.
  * <ul>
  * <li> Sprint 1: The "Healthy" project: nominal effort by both developers, consistently high
  * coverage, regular builds, commits, and tests, low churn, gradually increasing coverage.
- * <li> Sprint 2: The "Late Start": low effort, size, builds, tests, commits early in the week by
- * both developers, then a sudden burst of activity at the very end. As a result, testing and
+ * <li> Sprint 2: The "Late Start": low effort, size, builds, tests, commits early in the sprint by
+ * both developers, then a sudden burst of activity at the  end. As a result, testing and
  * coverage suffers.
- * <li> Sprint 3: "Code Entropy": During this week, developers work consistently, but churn is high
+ * <li> Sprint 3: "Code Entropy": During this sprint, developers work consistently, but churn is high
  * and test coverage is gradually falling. This is a kind of "early warning" that something is wrong
  * with the project.
- * <li> Spring 4: "Resource mismanagement": During this week, one developer is essentially idle, the
+ * <li> Spring 4: "Resource mismanagement": During this sprint, one developer is essentially idle, the
  * other is putting in 12 hour days, a zillion commits, etc. Testing and coverage are low. This is
  * an indication that project resources are not being allocated effectively. (I used to call this
  * the "Freeloader" scenario, but it's unfair to assume that the "idle" developer is blowing off
@@ -87,7 +87,7 @@ public class SimpleTelemetry {
    * @throws Exception If problems occur.
    */
   private void makeSprint1() throws Exception {
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 10; i++) {
       XMLGregorianCalendar day = Tstamp.incrementDays(projectStart, i);
       this.simData.getLogger().info(LOGPREFIX + day);
       
@@ -127,20 +127,20 @@ public class SimpleTelemetry {
   /**
    * Sprint 2: Work suffers from not getting started until late in the sprint.
    * <ul>
-   * <li> Effort is very low for first three days, then very high.
-   * <li> Size is very low for first three days, then jumps.
-   * <li> Builds and unit tests very low for first three days, then high.
-   * <li> Coverage is very low for first three days, never gets high.
-   * <li> No commits for first three days, then many in last two. High churn each time.
-   * <li>> High code issues in last two days, between 10 and 20 per file.
+   * <li> Effort is very low for first five days, then very high.
+   * <li> Size is very low for first five days, then jumps.
+   * <li> Builds and unit tests very low for first five days, then high.
+   * <li> Coverage is very low for first five days, never gets high.
+   * <li> 1 commit only for first five days, then many in last five days. High churn each time.
+   * <li>> 1 code issue for first five days, then increasing in last five days.
    * </ul>
    * @throws Exception If problems occur.
    */
   private void makeSprint2() throws Exception {
-    // Move forward 7 days to start the second sprint.
-    int dayOffset = 7;
-    // Do first three days of sprint in one loop.
-    for (int i = dayOffset + 0; i < dayOffset + 3; i++) {
+    // Move forward 10 days to start the second sprint.
+    int dayOffset = 10;
+    // Do first five days of sprint in one loop.
+    for (int i = dayOffset + 0; i < dayOffset + 5; i++) {
       XMLGregorianCalendar day = Tstamp.incrementDays(projectStart, i);
       this.simData.getLogger().info(LOGPREFIX + day);
       
@@ -154,23 +154,26 @@ public class SimpleTelemetry {
       simData.addFileMetric(joe, day, joeFile, joeFileSize, day);
       simData.addFileMetric(joe, day, bobFile, bobFileSize, day);
       
-      // Builds and unit tests between 0-2 times a day.
-      simData.addBuilds(joe, day, joeDir, SUCCESS, 0 + random.nextInt(1));
-      simData.addBuilds(bob, day, bobDir, SUCCESS, 0 + random.nextInt(1));
-      simData.addUnitTests(joe, day, joeFile, PASS, 0 + random.nextInt(1));
-      simData.addUnitTests(bob, day, bobFile, PASS, 0 + random.nextInt(1));
+      // Builds, unit tests, commits, churn, code issues are all low.
+      simData.addBuilds(joe, day, joeDir, SUCCESS, 1 + random.nextInt(1));
+      simData.addBuilds(bob, day, bobDir, SUCCESS, 1 + random.nextInt(1));
+      simData.addUnitTests(joe, day, joeFile, PASS, 1 + random.nextInt(1));
+      simData.addUnitTests(bob, day, bobFile, PASS, 1 + random.nextInt(1));
+      simData.addCommits(joe, day, joeFile, 10 + random.nextInt(10), 1 + random.nextInt(1));  
+      simData.addCommits(bob, day, bobFile, 10 + random.nextInt(10), 1 + random.nextInt(1));  
+      simData.addCodeIssues(joe, day, joeFile, 1 + random.nextInt(5));
+      simData.addCodeIssues(bob, day, bobFile, 1 + random.nextInt(5));
       
-      // Coverage is high, because very low code size.%
-      int joeCoverage = 70 + random.nextInt(5);
-      int bobCoverage = 70 + random.nextInt(5);
+      // Coverage is low
+      int joeCoverage = 10 + random.nextInt(5);
+      int bobCoverage = 10 + random.nextInt(5);
       simData.addCoverage(joe, day, joeFile, joeCoverage, joeFileSize, day);
       simData.addCoverage(joe, day, bobFile, bobCoverage, bobFileSize, day);
       
-      // No commits or churn for first three days.
     }
     
-    // Now do last two days.
-    for (int i = dayOffset + 3; i < dayOffset + 5; i++) {
+    // Now do last five days.
+    for (int i = dayOffset + 5; i < dayOffset + 5; i++) {
       XMLGregorianCalendar day = Tstamp.incrementDays(projectStart, i);
       this.simData.getLogger().info("SimpleTelemetry: Making data for day: " + day);
       
@@ -190,19 +193,19 @@ public class SimpleTelemetry {
       simData.addUnitTests(joe, day, joeFile, PASS, 20 + random.nextInt(20));
       simData.addUnitTests(bob, day, bobFile, PASS, 20 + random.nextInt(20));
       
-      // Coverage drops to around 40%
-      int joeCoverage = 30 + random.nextInt(10);
-      int bobCoverage = 30 + random.nextInt(10);
+      // Coverage doesn't rise much
+      int joeCoverage = 20 + random.nextInt(10);
+      int bobCoverage = 20 + random.nextInt(10);
       simData.addCoverage(joe, day, joeFile, joeCoverage, joeFileSize, day);
       simData.addCoverage(joe, day, bobFile, bobCoverage, bobFileSize, day);
       
-      // Lots of commits for last two days, with high churn.
+      // Lots of commits for last five days, with high churn.
       simData.addCommits(joe, day, joeFile, 200 + random.nextInt(10), 5 + random.nextInt(5));  
       simData.addCommits(bob, day, bobFile, 200 + random.nextInt(10), 5 + random.nextInt(5));  
       
-      // Code issues are high for last two days.
-      simData.addCodeIssues(joe, day, joeFile, 20 + random.nextInt(5));
-      simData.addCodeIssues(bob, day, bobFile, 20 + random.nextInt(5));
+      // Code issues increase steadily for last five days.
+      simData.addCodeIssues(joe, day, joeFile, ((i - dayOffset) * 10) + random.nextInt(5));
+      simData.addCodeIssues(bob, day, bobFile, ((i - dayOffset) * 10) + random.nextInt(5));
     }
   }
   
