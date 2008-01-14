@@ -220,15 +220,15 @@ public class SimpleTelemetry {
    * @throws Exception If problems occur.
    */
   private void makeSprint3() throws Exception {
-    // Move forward 14 days to start Sprint 3.
-    int dayOffset = 14;
-    for (int i = dayOffset + 0; i < dayOffset + 5; i++) {
+    // Move forward 20 days to start Sprint 3.
+    int dayOffset = 20;
+    for (int i = dayOffset + 0; i < dayOffset + 10; i++) {
       XMLGregorianCalendar day = Tstamp.incrementDays(projectStart, i);
       this.simData.getLogger().info(LOGPREFIX + day);
       
-      // Effort varies between 0 and eight hours (12 * 8) 
-      this.simData.addDevEvents(joe, day, 0 + random.nextInt(12 * 8), joeFile);
-      this.simData.addDevEvents(bob, day, 0 + random.nextInt(12 * 8), bobFile);
+      // Effort varies between 3 and 5 hours (12 * 8) 
+      this.simData.addDevEvents(joe, day, 36 + random.nextInt(12 * 2), joeFile);
+      this.simData.addDevEvents(bob, day, 36 + random.nextInt(12 * 2), bobFile);
       
       // Size is variable but has slight upward trend.
       int joeFileSize = 200 + ((i - dayOffset) * 50) + random.nextInt(20); 
@@ -236,11 +236,11 @@ public class SimpleTelemetry {
       simData.addFileMetric(joe, day, joeFile, joeFileSize, day);
       simData.addFileMetric(joe, day, bobFile, bobFileSize, day);
       
-      // Builds and unit tests are low; 0-2 times a day
-      simData.addBuilds(joe, day, joeDir, SUCCESS, 0 + random.nextInt(2));
-      simData.addBuilds(bob, day, bobDir, SUCCESS, 0 + random.nextInt(2));
-      simData.addUnitTests(joe, day, joeFile, PASS, 0 + random.nextInt(2));
-      simData.addUnitTests(bob, day, bobFile, PASS, 0 + random.nextInt(2));
+      // Builds and unit tests are low; 1-3 times a day
+      simData.addBuilds(joe, day, joeDir, SUCCESS, 1 + random.nextInt(2));
+      simData.addBuilds(bob, day, bobDir, SUCCESS, 1 + random.nextInt(2));
+      simData.addUnitTests(joe, day, joeFile, PASS, 1 + random.nextInt(2));
+      simData.addUnitTests(bob, day, bobFile, PASS, 1 + random.nextInt(2));
       
       // Coverage starts out about 90%, but falls 10% per day with a little random jiggle.
       int joeCoverage = 90 - ((i - dayOffset) * 10) + random.nextInt(3);
@@ -268,16 +268,16 @@ public class SimpleTelemetry {
    * @throws Exception If problems occur.
    */
   private void makeSprint4() throws Exception {
-    // Move forward 21 days to start Sprint 4.
-    int dayOffset = 21;
-    for (int i = dayOffset + 0; i < dayOffset + 5; i++) {
+    // Move forward 30 days to start Sprint 4.
+    int dayOffset = 30;
+    for (int i = dayOffset + 0; i < dayOffset + 10; i++) {
       XMLGregorianCalendar day = Tstamp.incrementDays(projectStart, i);
       this.simData.getLogger().info(LOGPREFIX + day);
       
-      // Joe: Effort varies between 5 and 13 hours 
-      this.simData.addDevEvents(joe, day, (12 * 5)  + random.nextInt(12 * 8), joeFile);
+      // Joe: Effort varies between 8 and 13 hours 
+      this.simData.addDevEvents(joe, day, (12 * 8)  + random.nextInt(12 * 5), joeFile);
       // Bob: Effort varies between 0 and 1 hour.
-      this.simData.addDevEvents(bob, day, 0 + random.nextInt(12), bobFile);
+      this.simData.addDevEvents(bob, day, 1 + random.nextInt(11), bobFile);
       
       // Joe: size is variable, moving upward fast. Bob: not much size increase.
       int joeFileSize = 10 + ((i - dayOffset) * 100) + random.nextInt(20); 
@@ -287,9 +287,9 @@ public class SimpleTelemetry {
       
       // Builds and unit tests between 0-10 times a day.
       simData.addBuilds(joe, day, joeDir, SUCCESS, 5 + random.nextInt(2));
-      simData.addBuilds(bob, day, bobDir, SUCCESS, 0 + random.nextInt(1));
+      simData.addBuilds(bob, day, bobDir, SUCCESS, 1 + random.nextInt(1));
       simData.addUnitTests(joe, day, joeFile, PASS, 10 + random.nextInt(2));
-      simData.addUnitTests(bob, day, bobFile, PASS, 0 + random.nextInt(1));
+      simData.addUnitTests(bob, day, bobFile, PASS, 1 + random.nextInt(1));
       
       // Coverage stays low.
       int joeCoverage = 30 + random.nextInt(10);

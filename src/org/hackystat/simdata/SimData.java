@@ -80,6 +80,7 @@ public class SimData {
     SensorBaseClient.registerUser(this.host, email);
     SensorBaseClient client = new SensorBaseClient(host, email, email);
     client.authenticate();
+    client.setTimeout(100000);
     clients.put(userName, client);
     // I get timeout errors when registering the second user if I call deleteSensorData.
     //client.deleteSensorData(email); 
