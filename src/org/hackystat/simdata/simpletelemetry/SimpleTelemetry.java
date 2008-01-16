@@ -16,14 +16,14 @@ import org.hackystat.utilities.tstamp.Tstamp;
  * <li> Sprint 1: The "Healthy" project: nominal effort by both developers, consistently high
  * coverage, regular builds, commits, and tests, low churn, gradually increasing coverage.
  * <li> Sprint 2: The "Late Start": low effort, size, builds, tests, commits early in the sprint by
- * both developers, then a sudden burst of activity at the  end. As a result, testing and
- * coverage suffers.
- * <li> Sprint 3: "Code Entropy": During this sprint, developers work consistently, but churn is high
- * and test coverage is gradually falling. This is a kind of "early warning" that something is wrong
- * with the project.
- * <li> Spring 4: "Resource mismanagement": During this sprint, one developer is essentially idle, the
- * other is putting in 12 hour days, a zillion commits, etc. Testing and coverage are low. This is
- * an indication that project resources are not being allocated effectively. (I used to call this
+ * both developers, then a sudden burst of activity at the end. As a result, testing and coverage
+ * suffers.
+ * <li> Sprint 3: "Code Entropy": During this sprint, developers work consistently, but churn is
+ * high and test coverage is gradually falling. This is a kind of "early warning" that something is
+ * wrong with the project.
+ * <li> Spring 4: "Resource mismanagement": During this sprint, one developer is essentially idle,
+ * the other is putting in 12 hour days, a zillion commits, etc. Testing and coverage are low. This
+ * is an indication that project resources are not being allocated effectively. (I used to call this
  * the "Freeloader" scenario, but it's unfair to assume that the "idle" developer is blowing off
  * work. The idle developer might be working 12 hour days too, but just on non-development work. The
  * real issue is that the second developer is over-committed, as evidenced by decreased testing and
@@ -40,7 +40,7 @@ public class SimpleTelemetry {
   static String bob = "bob.simpletelemetry";
   static String project = "simpletelemetry";
   static String startString = "2007-07-02";
-  static String endString = "2007-08-01";
+  static String endString = "2007-09-01";
   
   private XMLGregorianCalendar projectStart = Tstamp.makeTimestamp(startString); // Monday.
   private XMLGregorianCalendar projectEnd = Tstamp.makeTimestamp(endString);
@@ -72,6 +72,8 @@ public class SimpleTelemetry {
     makeSprint2();
     makeSprint3();
     makeSprint4();
+    // Make sure all remaining data is sent. 
+    this.simData.quitShells();
   }
   
   /**
@@ -173,7 +175,7 @@ public class SimpleTelemetry {
     }
     
     // Now do last five days.
-    for (int i = dayOffset + 5; i < dayOffset + 5; i++) {
+    for (int i = dayOffset + 5; i < dayOffset + 10; i++) {
       XMLGregorianCalendar day = Tstamp.incrementDays(projectStart, i);
       this.simData.getLogger().info("SimpleTelemetry: Making data for day: " + day);
       

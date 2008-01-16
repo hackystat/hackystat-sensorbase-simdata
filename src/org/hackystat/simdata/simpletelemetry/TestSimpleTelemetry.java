@@ -53,10 +53,12 @@ public class TestSimpleTelemetry extends SimDataTestHelper {
    */
   @Before
   public void setupData() throws Exception {
-    String sendData = System.getProperty("org.hackystat.simdata.TestSimpleTelemetry.sendData");
+    String sendDataKey = "org.hackystat.simdata.TestSimpleTelemetry.sendData";
+    String noSend = "false";
+    String sendData = System.getProperty(sendDataKey);
     // Only set up data if not disabled and we haven't done it previously.
-    if (!"false".equals(sendData) && (!invokedSimpleTelemetry)) { 
-      invokedSimpleTelemetry = true;
+    if (!noSend.equals(sendData) && (!invokedSimpleTelemetry)) { 
+      System.setProperty(sendDataKey, noSend);
       new SimpleTelemetry(this.getSensorBaseHostName());
     }
     day1 = Tstamp.makeTimestamp(SimpleTelemetry.startString);
@@ -90,7 +92,8 @@ public class TestSimpleTelemetry extends SimDataTestHelper {
    * Tests the Build data.
    * @throws Exception If problems occur. 
    */
-  @Test public void testDPDBuild() throws Exception {
+  @Test 
+  public void testDPDBuild() throws Exception {
     // Check builds for day 1.
     BuildDailyProjectData builds = dpdClient.getBuild(joe, project, day1);
     int joeBuilds = 0;
@@ -113,7 +116,9 @@ public class TestSimpleTelemetry extends SimDataTestHelper {
    * Tests the FileMetric data.
    * @throws Exception If problems occur. 
    */
-  @Test public void testDPDFileMetric() throws Exception {
+  @Test 
+  public 
+  void testDPDFileMetric() throws Exception {
     // Check size for day 1.
     FileMetricDailyProjectData fileMetric = 
       dpdClient.getFileMetric(joe, project, day1, "TotalLines");
@@ -124,7 +129,8 @@ public class TestSimpleTelemetry extends SimDataTestHelper {
    * Tests the UnitTest data.
    * @throws Exception If problems occur. 
    */
-  @Test public void testDPDUnitTest() throws Exception {
+  @Test 
+  public void testDPDUnitTest() throws Exception {
 
     // Check Unit Tests for day 1.
     UnitTestDailyProjectData tests = dpdClient.getUnitTest(joe, project, day1);
@@ -147,7 +153,8 @@ public class TestSimpleTelemetry extends SimDataTestHelper {
    * Tests the Commit data.
    * @throws Exception If problems occur. 
    */
-  @Test public void testDPDCommit() throws Exception {
+  @Test 
+  public void testDPDCommit() throws Exception {
     
     // Check commits for day 1.
     CommitDailyProjectData commits = dpdClient.getCommit(joe, project, day1);
@@ -172,7 +179,8 @@ public class TestSimpleTelemetry extends SimDataTestHelper {
    * Tests the Coverage data.
    * @throws Exception If problems occur. 
    */
-  @Test public void testDPDCoverage() throws Exception {
+  @Test 
+  public void testDPDCoverage() throws Exception {
     // Check Coverage for day 1.
     CoverageDailyProjectData coverage = dpdClient.getCoverage(joe, project, day1, "line");
     for (org.hackystat.dailyprojectdata.resource.coverage.jaxb.ConstructData data : 
@@ -234,7 +242,7 @@ public class TestSimpleTelemetry extends SimDataTestHelper {
    * not needed for quality assurance. 
    * @throws Exception If problems occur. 
    */
-  //@Ignore
+  @Ignore
   @Test public void testAllTelemetryMemberTrends() throws Exception {
     String name = "MemberTrends";
     XMLGregorianCalendar start1 = day1;
@@ -282,7 +290,7 @@ public class TestSimpleTelemetry extends SimDataTestHelper {
    * not needed for quality assurance. 
    * @throws Exception If problems occur. 
    */
-  //@Ignore
+  @Ignore
   @Test public void testAllProductTrends() throws Exception {
     String devChart = "ProductDevTrends";
     String qaChart = "ProductQATrends";

@@ -14,6 +14,8 @@ import org.hackystat.sensorbase.resource.projects.jaxb.UriPatterns;
 import org.hackystat.sensorbase.resource.sensordata.jaxb.Properties;
 import org.hackystat.sensorbase.resource.sensordata.jaxb.Property;
 import org.hackystat.sensorbase.resource.sensordata.jaxb.SensorData;
+import org.hackystat.sensorshell.SensorShell;
+import org.hackystat.sensorshell.SensorShellProperties;
 import org.hackystat.simdata.simpletelemetry.SimpleTelemetry;
 import org.hackystat.utilities.logger.HackystatLogger;
 import org.hackystat.utilities.tstamp.Tstamp;
@@ -36,7 +38,10 @@ public class SimData {
   
   /** Maps user names to their associated SensorBaseClients. */
   private Map<String, SensorBaseClient> clients = new HashMap<String, SensorBaseClient>();
-  
+
+  /** Maps user names to their associated SensorShells. */
+  private Map<String, SensorShell> shells = new HashMap<String, SensorShell>();
+
   /** A millisecond offset to guarantee sensor data uniqueness. */
   private int milliseconds = 0;
   
@@ -72,6 +77,7 @@ public class SimData {
   
   /**
    * Registers the user with the test domain suffix at the host.
+   * Deletes any pre-existing data they might have. 
    * @param userName The user name, with the domain.
    * @throws Exception If problems occur. 
    */
@@ -82,8 +88,34 @@ public class SimData {
     client.authenticate();
     client.setTimeout(100000);
     clients.put(userName, client);
-    // I get timeout errors when registering the second user if I call deleteSensorData.
+    shells.put(userName, makeShell(email));
     //client.deleteSensorData(email); 
+  }
+  
+  /**
+   * Creates a returns a SensorShell instance for this user. 
+   * @param email The user whose shell is to be created. 
+   * @return The initialized sensorshell.
+   * @throws Exception If problems occur.
+   */
+  private SensorShell makeShell(String email) throws Exception {
+    // The testing configuration of SensorShell is good for SimData.
+    SensorShellProperties testProps = SensorShellProperties.getTestInstance(host, email, email);
+    //SensorShellProperties shellProps = new SensorShellProperties(host, email, email);
+    java.util.Properties props = new java.util.Properties();
+    props.setProperty(SensorShellProperties.SENSORSHELL_MULTISHELL_ENABLED_KEY, "true");
+    SensorShellProperties shellProps = new SensorShellProperties(testProps, props);
+    return new SensorShell(shellProps, false, "SimData");
+  }
+  
+  /**
+   * Invokes quit() on all created shells, thus ensuring that any remaining buffered
+   * data is sent to the host. 
+   */
+  public void quitShells() {
+    for (SensorShell shell : shells.values()) {
+      shell.quit();
+    }
   }
   
   /**
@@ -192,14 +224,14 @@ public class SimData {
    * @param tstamp The starting timestamp.
    * @param numDevEvents The total number of DevEvents to generate.  Each are five minutes apart.
    * @param file The file to be used as the resource.
-   * @throws SensorBaseClientException If problems occur.
+   * @throws Exception If problems occur.
    */
   public void addDevEvents(String user, XMLGregorianCalendar tstamp, int numDevEvents, String file) 
-  throws SensorBaseClientException {
+  throws Exception {
     for (int i = 0; i < numDevEvents; i++) {
       XMLGregorianCalendar timestamp = Tstamp.incrementMinutes(tstamp, i * 5);
       SensorData data = makeSensorData(user, "DevEvent", "Eclipse", file, timestamp);
-      clients.get(user).putSensorData(data);
+      shells.get(user).add(data);
     }
   }
   
@@ -209,13 +241,13 @@ public class SimData {
    * @param tstamp The timestamp.
    * @param file The file to be used as the resource.
    * @param numIssues The total number of CodeIssues in this instance.
-   * @throws SensorBaseClientException If problems occur.
+   * @throws Exception If problems occur.
    */
   public void addCodeIssues(String user, XMLGregorianCalendar tstamp, String file, int numIssues) 
-  throws SensorBaseClientException {
+  throws Exception {
     SensorData data = makeSensorData(user, "CodeIssue", "FindBugs", file, tstamp);
     addProperty(data, "Type_NPE", String.valueOf(numIssues));
-    clients.get(user).putSensorData(data);
+    shells.get(user).add(data);
   }
   
   /**
@@ -226,14 +258,14 @@ public class SimData {
    * @param totalLines The total lines of code. 
    * @param runtime The runtime timestamp, so that multiple FileMetrics will be bundled together in
    * analyses.
-   * @throws SensorBaseClientException If problems occur. 
+   * @throws Exception If problems occur. 
    */
   public void addFileMetric(String user, XMLGregorianCalendar tstamp, String file, int totalLines, 
       XMLGregorianCalendar runtime)
-  throws SensorBaseClientException {
+  throws Exception {
     SensorData data = makeSensorData(user, "FileMetric", "SCLC", file, tstamp, runtime);
     addProperty(data, "TotalLines", String.valueOf(totalLines));
-    clients.get(user).putSensorData(data);
+    shells.get(user).add(data);
   }
   
   /**
@@ -252,7 +284,7 @@ public class SimData {
     SensorData data = makeSensorData(user, "Commit", "Subversion", file, tstamp);
     addProperty(data, "linesAdded", String.valueOf(linesAdded));
     addProperty(data, "linesDeleted", String.valueOf(linesDeleted));
-    clients.get(user).putSensorData(data);
+    shells.get(user).add(data);
   }
   
   /**
@@ -277,7 +309,7 @@ public class SimData {
       SensorData data = makeSensorData(user, "Commit", "Subversion", file, tstamp);
       addProperty(data, "linesAdded", String.valueOf(linesAddedOrDeleted));
       addProperty(data, "linesDeleted", String.valueOf(linesAddedOrDeleted));
-      clients.get(user).putSensorData(data);
+      shells.get(user).add(data);
     }
   }
   
@@ -288,14 +320,14 @@ public class SimData {
    * @param file The resource.
    * @param result The string Success or Failure.
    * @param numBuilds The number of Build instances to create. 
-   * @throws SensorBaseClientException If problems occur. 
+   * @throws Exception If problems occur. 
    */
   public void addBuilds(String user, XMLGregorianCalendar tstamp, String file, String result, 
-      int numBuilds) throws SensorBaseClientException {
+      int numBuilds) throws Exception {
     for (int i = 0; i < numBuilds; i++) {
       SensorData data = makeSensorData(user, "Build", "Ant", file, tstamp);
       addProperty(data, "Result", result);
-      clients.get(user).putSensorData(data);
+      shells.get(user).add(data);
     }
   }
   
@@ -306,15 +338,14 @@ public class SimData {
    * @param file The resource.
    * @param result The string "pass" or "fail"
    * @param numTests The number of test instances to create.
-   * @throws SensorBaseClientException If problems occur. 
+   * @throws Exception If problems occur. 
    */
   public void addUnitTests(String user, XMLGregorianCalendar tstamp, String file, String result, 
-      int numTests) 
-  throws SensorBaseClientException {
+      int numTests) throws Exception {
     for (int i = 0; i < numTests; i++) {
       SensorData data = makeSensorData(user, "UnitTest", "JUnit", file, tstamp);
       addProperty(data, "Result", result);
-      clients.get(user).putSensorData(data);
+      shells.get(user).add(data);
     }
   }
   
@@ -341,7 +372,7 @@ public class SimData {
     SensorData data = makeSensorData(user, "Coverage", "Emma", file, tstamp, runtime);
     addProperty(data, "line_Covered", String.valueOf(covered));
     addProperty(data, "line_Uncovered", String.valueOf(uncovered));
-    clients.get(user).putSensorData(data);
+    shells.get(user).add(data);
   }
   
   /**

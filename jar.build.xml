@@ -19,6 +19,7 @@
     </copy>
   
     <unjar src="${env.HACKYSTAT_SENSORBASE_HOME}/sensorbaseclient.jar" dest="${tmp.dir}"/>
+    <unjar src="${env.HACKYSTAT_SENSORSHELL_HOME}/sensorshell.jar" dest="${tmp.dir}"/>
 
     <jar destfile="${basedir}/simdata.jar" basedir="${tmp.dir}">
        <manifest>

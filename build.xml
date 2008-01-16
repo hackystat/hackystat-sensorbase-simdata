@@ -32,6 +32,10 @@
   <available file="${env.HACKYSTAT_SENSORBASE_HOME}/sensorbaseclient.jar" type="file" property="sensorbase.available"/>
   <fail message="This package requires ${env.HACKYSTAT_SENSORBASE_HOME}/sensorbase.jar" unless="sensorbase.available"/>
   
+  <!-- Make sure that the SensorShell jar is available . --> 
+   <available file="${env.HACKYSTAT_SENSORSHELL_HOME}/sensorshell.jar" type="file" property="sensorshell.available"/>
+   <fail message="This package requires ${env.HACKYSTAT_SENSORSHELL_HOME}/sensorshell.jar" unless="sensorshell.available"/>
+  
   <!-- Basic properties for this system. --> 
   <property name="system.name" value="hackystat-sensorbase-simdata" />
   <property name="majorVersionNumber" value="8" />
@@ -57,8 +61,10 @@
   <!-- The compile classpath is useful to many tools. -->
   <path id="compile.classpath">
     <fileset file="${env.HACKYSTAT_SENSORBASE_HOME}/sensorbase.jar"/>
+    <fileset file="${env.HACKYSTAT_SENSORSHELL_HOME}/sensorshell.jar"/>
     <fileset file="${env.HACKYSTAT_DAILYPROJECTDATA_HOME}/dailyprojectdata.jar"/>
     <fileset file="${env.HACKYSTAT_TELEMETRY_HOME}/telemetry.jar"/>
+    <fileset file="${env.JAVAMAIL_HOME}/mail.jar"/>
     <fileset file="${env.JUNIT_HOME}/junit-${junit.version}.jar"/>
     <fileset file="${env.FINDBUGS_HOME}/lib/annotations.jar"/> 
   </path> 
