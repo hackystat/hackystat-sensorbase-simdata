@@ -186,10 +186,10 @@ public class TestSimpleTelemetry extends SimDataTestHelper {
     for (org.hackystat.dailyprojectdata.resource.coverage.jaxb.ConstructData data : 
       coverage.getConstructData()) {
       if (data.getName().contains("Joe.java")) {
-        assertEquals("Checking Joe.java coverage", 107, data.getNumCovered().intValue());
+        assertEquals("Checking Joe.java coverage", 107, data.getNumCovered());
       }
       if (data.getName().contains("Bob.java")) {
-        assertEquals("Checking Bob.java coverage", 100, data.getNumCovered().intValue());
+        assertEquals("Checking Bob.java coverage", 100, data.getNumCovered());
       }
     }
   }
