@@ -33,8 +33,8 @@ DevTime. All data is non-cumulative.
   <SourceCode>
 <![CDATA[
 chart ProductDevTrends() = {
-  "Coverage, Size, Churn, Commit, UnitTest, Build, CodeIssue, and DevTime", 
-  (FileMetricStream("TotalLines"), yAxis("Total LOC")),
+  "Size, Churn, Commit, Build, DevTime", 
+  (FileMetricStream("TotalLines", "SCLC"), yAxis("Total LOC")),
   (ChurnStream("*", "false"), yAxis("Churn count")),
   (CommitStream("*", "false"), yAxis("Commit count")),
   (BuildStream("*", "*", "*", "false"), yAxis("Build invocations")),
@@ -48,15 +48,16 @@ chart ProductDevTrends() = {
 
 <TelemetryDefinition Name="ProductQATrends" DefinitionType="Chart" ShareScope="Global">
   <Description>
-This chart provides insight into product quality assurance trends including: Coverage, Test Invocations, and 
-Code Issues. All data is non-cumulative.
+This chart provides insight into product quality assurance trends including: Coverage, 
+Average Complexity per method, Test Invocations, and  Code Issues. All data is non-cumulative.
   </Description>
 
   <SourceCode>
 <![CDATA[
 chart ProductQATrends() = {
-  "Coverage, Size, Churn, Commit, UnitTest, Build, CodeIssue, and DevTime", 
+  "Coverage, Complexity, UnitTest, CodeIssue", 
   (CoverageStream("Percentage", "line"), yAxis("Coverage percentage")),
+  (CyclomaticComplexityStream("AverageComplexityPerMethod", "10", "JavaNCSS"), yAxis("Average Complexity per Method")),
   (UnitTestStream("TotalCount", "*", "false"), yAxis("UnitTest invocations")),
   (CodeIssueStream("*", "*"), yAxis("CodeIssue counts"))
 };

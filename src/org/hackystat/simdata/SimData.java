@@ -87,9 +87,9 @@ public class SimData {
     SensorBaseClient client = new SensorBaseClient(host, email, email);
     client.authenticate();
     client.setTimeout(100000);
+    client.deleteSensorData(email); 
     clients.put(userName, client);
     shells.put(userName, makeShell(email));
-    //client.deleteSensorData(email); 
   }
   
   /**
@@ -104,6 +104,7 @@ public class SimData {
     //SensorShellProperties shellProps = new SensorShellProperties(host, email, email);
     java.util.Properties props = new java.util.Properties();
     props.setProperty(SensorShellProperties.SENSORSHELL_MULTISHELL_ENABLED_KEY, "true");
+    props.setProperty(SensorShellProperties.SENSORSHELL_MULTISHELL_NUMSHELLS_KEY, "2");
     SensorShellProperties shellProps = new SensorShellProperties(testProps, props);
     return new SensorShell(shellProps, false, "SimData");
   }
@@ -251,7 +252,7 @@ public class SimData {
   }
   
   /**
-   * Adds a single FileMetric sensor data instance. 
+   * Adds a single FileMetric sensor data instance using the SCLC tool.
    * @param user The user who owns this FileMetric.
    * @param tstamp The tstamp (and runtime) for this FileMetric.
    * @param file The resource.
@@ -265,6 +266,27 @@ public class SimData {
   throws Exception {
     SensorData data = makeSensorData(user, "FileMetric", "SCLC", file, tstamp, runtime);
     addProperty(data, "TotalLines", String.valueOf(totalLines));
+    shells.get(user).add(data);
+  }
+  
+  /**
+   * Adds a single FileMetric sensor data instance representing Cyclomatic Complexity using the 
+   * JavaNCSS tool.
+   * @param user The user who owns this FileMetric.
+   * @param tstamp The tstamp (and runtime) for this FileMetric.
+   * @param file The resource.
+   * @param totalLines The total lines of code. 
+   * @param runtime The runtime timestamp, so that multiple FileMetrics will be bundled together in
+   * analyses.
+   * @param complexity A single complexity value for this file. 
+   * @throws Exception If problems occur. 
+   */
+  public void addComplexity(String user, XMLGregorianCalendar tstamp, String file, 
+      int totalLines, XMLGregorianCalendar runtime, int complexity)
+  throws Exception {
+    SensorData data = makeSensorData(user, "FileMetric", "JavaNCSS", file, tstamp, runtime);
+    addProperty(data, "TotalLines", String.valueOf(totalLines));
+    addProperty(data, "CyclomaticComplexityList", String.valueOf(complexity));
     shells.get(user).add(data);
   }
   

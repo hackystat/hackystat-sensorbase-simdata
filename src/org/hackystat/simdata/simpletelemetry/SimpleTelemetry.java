@@ -14,15 +14,17 @@ import org.hackystat.utilities.tstamp.Tstamp;
  * simulated Scrum "sprints", each lasting 10 days.
  * <ul>
  * <li> Sprint 1: The "Healthy" project: nominal effort by both developers, consistently high
- * coverage, regular builds, commits, and tests, low churn, gradually increasing coverage.
+ * coverage, regular builds, commits, and tests, low churn, low average complexity, 
+ * gradually increasing coverage.
  * <li> Sprint 2: The "Late Start": low effort, size, builds, tests, commits early in the sprint by
- * both developers, then a sudden burst of activity at the end. As a result, testing and coverage
- * suffers.
+ * both developers, then a sudden burst of activity at the end. As a result, testing, coverage, 
+ * and complexity suffers.
  * <li> Sprint 3: "Code Entropy": During this sprint, developers work consistently, but churn is
- * high and test coverage is gradually falling. This is a kind of "early warning" that something is
- * wrong with the project.
+ * high, test coverage is gradually falling, and complexity is increasing. This is a kind of 
+ * "early warning" that something is wrong with the project.
  * <li> Spring 4: "Resource mismanagement": During this sprint, one developer is essentially idle,
- * the other is putting in 12 hour days, a zillion commits, etc. Testing and coverage are low. This
+ * the other is putting in 12 hour days, a zillion commits, etc. Testing and coverage are low, and
+ * average complexity is high. This
  * is an indication that project resources are not being allocated effectively. (I used to call this
  * the "Freeloader" scenario, but it's unfair to assume that the "idle" developer is blowing off
  * work. The idle developer might be working 12 hour days too, but just on non-development work. The
@@ -83,6 +85,7 @@ public class SimpleTelemetry {
    * <li> Size increases steadily, starting at about 100 and increasing by 10 or so lines per day.
    * <li> Builds and unit tests between 2-6 times a day.
    * <li> Coverage is always at least 80%.
+   * <li> Average complexity is low and stable (between 3 and 6).
    * <li> CodeIssues is stable and low, between 5 and 10 per file.
    * <li> They each commit once a day, with relatively low churn (less than 20%).
    * </ul>
@@ -102,6 +105,10 @@ public class SimpleTelemetry {
       int bobFileSize = 100 + (i * 50) + random.nextInt(10); 
       simData.addFileMetric(joe, day, joeFile, joeFileSize, day);
       simData.addFileMetric(joe, day, bobFile, bobFileSize, day);
+      
+      // Complexity is low and stable (between 3 and 6).
+      simData.addComplexity(joe, day, bobFile, bobFileSize, day, 3 + random.nextInt(3));
+      simData.addComplexity(joe, day, joeFile, joeFileSize, day, 3 + random.nextInt(3));
       
       // Builds and unit tests between 2-6 times a day.
       simData.addBuilds(joe, day, joeDir, SUCCESS, 2 + random.nextInt(5));
@@ -132,6 +139,7 @@ public class SimpleTelemetry {
    * <li> Effort is very low for first five days, then very high.
    * <li> Size is very low for first five days, then jumps.
    * <li> Builds and unit tests very low for first five days, then high.
+   * <li> Average complexity low for first five days, then jumps. 
    * <li> Coverage is very low for first five days, never gets high.
    * <li> 1 commit only for first five days, then many in last five days. High churn each time.
    * <li>> 1 code issue for first five days, then increasing in last five days.
@@ -155,6 +163,10 @@ public class SimpleTelemetry {
       int bobFileSize = 20 + random.nextInt(10); 
       simData.addFileMetric(joe, day, joeFile, joeFileSize, day);
       simData.addFileMetric(joe, day, bobFile, bobFileSize, day);
+      
+      // Complexity is low (between 3 and 6).
+      simData.addComplexity(joe, day, bobFile, bobFileSize, day, 3 + random.nextInt(3));
+      simData.addComplexity(joe, day, joeFile, joeFileSize, day, 3 + random.nextInt(3));
       
       // Builds, unit tests, commits, churn, code issues are all low.
       simData.addBuilds(joe, day, joeDir, SUCCESS, 1 + random.nextInt(1));
@@ -189,6 +201,10 @@ public class SimpleTelemetry {
       simData.addFileMetric(joe, day, joeFile, joeFileSize, day);
       simData.addFileMetric(joe, day, bobFile, bobFileSize, day);
       
+      // Complexity is high and increasing (10 + day + rand(2))
+      simData.addComplexity(joe, day, bobFile, bobFileSize, day, 10 + i + random.nextInt(2));
+      simData.addComplexity(joe, day, joeFile, joeFileSize, day, 10 + i + random.nextInt(2));
+      
       // Builds and unit tests between 20 and 40 per day
       simData.addBuilds(joe, day, joeDir, SUCCESS, 20 + random.nextInt(20));
       simData.addBuilds(bob, day, bobDir, SUCCESS, 20 + random.nextInt(20));
@@ -212,12 +228,14 @@ public class SimpleTelemetry {
   }
   
   /**
-   * Sprint 3: High churn, falling coverage, and increasing code issues indicate a trouble project.
+   * Sprint 3: High churn, falling coverage, and increasing code issues and complexity 
+   * indicate a trouble project.
    * <ul>
    * <li> Effort, size, builds, and unit tests are quite variable.
    * <li> Coverage shows a falling trend.
    * <li> High churn on commits.
    * <li> Code issues steadily rising.
+   * <li> Complexity steadily rising.
    * </ul>
    * @throws Exception If problems occur.
    */
@@ -237,6 +255,10 @@ public class SimpleTelemetry {
       int bobFileSize = 200 + ((i - dayOffset) * 50) + random.nextInt(20); 
       simData.addFileMetric(joe, day, joeFile, joeFileSize, day);
       simData.addFileMetric(joe, day, bobFile, bobFileSize, day);
+      
+      // Complexity is steadily increasing.
+      simData.addComplexity(joe, day, bobFile, bobFileSize, day, 5 + i + random.nextInt(2));
+      simData.addComplexity(joe, day, joeFile, joeFileSize, day, 5 + i + random.nextInt(2));
       
       // Builds and unit tests are low; 1-3 times a day
       simData.addBuilds(joe, day, joeDir, SUCCESS, 1 + random.nextInt(2));
@@ -287,6 +309,10 @@ public class SimpleTelemetry {
       simData.addFileMetric(joe, day, joeFile, joeFileSize, day);
       simData.addFileMetric(joe, day, bobFile, bobFileSize, day);
       
+      // Joe: Complexity is steadily increasing, Bob: complexity is low. 
+      simData.addComplexity(joe, day, bobFile, bobFileSize, day, 2 + random.nextInt(2));
+      simData.addComplexity(joe, day, joeFile, joeFileSize, day, 5 + i + random.nextInt(2));
+        
       // Builds and unit tests between 0-10 times a day.
       simData.addBuilds(joe, day, joeDir, SUCCESS, 5 + random.nextInt(2));
       simData.addBuilds(bob, day, bobDir, SUCCESS, 1 + random.nextInt(1));

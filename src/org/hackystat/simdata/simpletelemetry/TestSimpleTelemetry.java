@@ -42,6 +42,15 @@ public class TestSimpleTelemetry extends SimDataTestHelper {
   private DailyProjectDataClient dpdClient;
   private TelemetryClient telemetryClient;
   private String day = "Day";
+  
+  private XMLGregorianCalendar start1;
+  private XMLGregorianCalendar start2;
+  private XMLGregorianCalendar start3;
+  private XMLGregorianCalendar start4;
+  private XMLGregorianCalendar end1;
+  private XMLGregorianCalendar end2;
+  private XMLGregorianCalendar end3;
+  private XMLGregorianCalendar end4;
 
   /**
    * Runs the SimpleTelemetry scenario to set up the data on the SensorBase.
@@ -64,6 +73,15 @@ public class TestSimpleTelemetry extends SimDataTestHelper {
     day1 = Tstamp.makeTimestamp(SimpleTelemetry.startString);
     dpdClient = new DailyProjectDataClient(dpdHost, joe, joe);
     telemetryClient = new TelemetryClient(telemetryHost, joe, joe);
+    day1 = Tstamp.makeTimestamp(SimpleTelemetry.startString);
+    start1 = day1;
+    start2 = Tstamp.incrementDays(start1, 10);
+    start3 = Tstamp.incrementDays(start2, 10);
+    start4 = Tstamp.incrementDays(start3, 10);
+    end1 = Tstamp.incrementDays(start1, 9);
+    end2 = Tstamp.incrementDays(start2, 9);
+    end3 = Tstamp.incrementDays(start3, 9);
+    end4 = Tstamp.incrementDays(start4, 9);
   }
   
   /**
@@ -107,8 +125,8 @@ public class TestSimpleTelemetry extends SimDataTestHelper {
         bobBuilds = memberData.getSuccess() + memberData.getFailure();
       }
     }
-    assertEquals("Checking Joe Builds", 2, joeBuilds);
-    assertEquals("Checking Bob Builds", 5, bobBuilds);
+    assertEquals("Checking Joe Builds", 3, joeBuilds);
+    assertEquals("Checking Bob Builds", 3, bobBuilds);
   }
   
   
@@ -122,7 +140,7 @@ public class TestSimpleTelemetry extends SimDataTestHelper {
     // Check size for day 1.
     FileMetricDailyProjectData fileMetric = 
       dpdClient.getFileMetric(joe, project, day1, "TotalLines");
-    assertEquals("Checking totalSize", 216, fileMetric.getTotal(), 0.1);
+    assertEquals("Checking totalSize", 432, fileMetric.getTotal(), 0.1);
   }
   
   /**
@@ -145,8 +163,8 @@ public class TestSimpleTelemetry extends SimDataTestHelper {
         bobTests = memberData.getSuccess().intValue() + memberData.getFailure().intValue();
       }
     }
-    assertEquals("Checking Joe Tests", 3, joeTests);
-    assertEquals("Checking Bob Tests", 3, bobTests);
+    assertEquals("Checking Joe Tests", 6, joeTests);
+    assertEquals("Checking Bob Tests", 6, bobTests);
   }
   
   /**
@@ -171,8 +189,8 @@ public class TestSimpleTelemetry extends SimDataTestHelper {
           memberData.getLinesAdded() + memberData.getLinesDeleted();
       }
     }
-    assertEquals("Checking Joe Churn", 54, joeChurn);
-    assertEquals("Checking Bob Churn", 53, bobChurn);
+    assertEquals("Checking Joe Churn", 45, joeChurn);
+    assertEquals("Checking Bob Churn", 55, bobChurn);
   }
   
   /**
@@ -186,10 +204,10 @@ public class TestSimpleTelemetry extends SimDataTestHelper {
     for (org.hackystat.dailyprojectdata.resource.coverage.jaxb.ConstructData data : 
       coverage.getConstructData()) {
       if (data.getName().contains("Joe.java")) {
-        assertEquals("Checking Joe.java coverage", 107, data.getNumCovered());
+        assertEquals("Checking Joe.java coverage", 105, data.getNumCovered());
       }
       if (data.getName().contains("Bob.java")) {
-        assertEquals("Checking Bob.java coverage", 100, data.getNumCovered());
+        assertEquals("Checking Bob.java coverage", 103, data.getNumCovered());
       }
     }
   }
@@ -198,7 +216,7 @@ public class TestSimpleTelemetry extends SimDataTestHelper {
    * Tests the Telemetry streams associated with SimpleTelemetry.
    * @throws Exception If problems occur. 
    */
-  @Ignore
+  //@Ignore
   @Test public void testTelemetryProductTrends() throws Exception {
     String chartName = "ProductDevTrends";
     String params = "";
@@ -212,7 +230,7 @@ public class TestSimpleTelemetry extends SimDataTestHelper {
     System.out.println("Starting ProductQATrends telemetry generation.");
     chart = telemetryClient.getChart(chartName, joe, project, day, day1, 
         Tstamp.incrementDays(day1, 4), params);
-    assertEquals("Checking for 3 streams returned", 3, chart.getTelemetryStream().size());
+    assertEquals("Checking for streams returned", 4, chart.getTelemetryStream().size());
     System.out.println(TelemetryClient.toString(chart));
     
   }
@@ -245,37 +263,28 @@ public class TestSimpleTelemetry extends SimDataTestHelper {
   @Ignore
   @Test public void testAllTelemetryMemberTrends() throws Exception {
     String name = "MemberTrends";
-    XMLGregorianCalendar start1 = day1;
-    XMLGregorianCalendar start2 = Tstamp.incrementDays(start1, 7);
-    XMLGregorianCalendar start3 = Tstamp.incrementDays(start1, 14);
-    XMLGregorianCalendar start4 = Tstamp.incrementDays(start1, 21);
-    XMLGregorianCalendar end1 = Tstamp.incrementDays(start1, 4);
-    XMLGregorianCalendar end2 = Tstamp.incrementDays(start2, 4);
-    XMLGregorianCalendar end3 = Tstamp.incrementDays(start3, 4);
-    XMLGregorianCalendar end4 = Tstamp.incrementDays(start4, 4);
-
     TelemetryChartData chart;
     
-    // Week 1
-    System.out.println("\n\nMember Trends Week 1:  Healthy");
+    // Sprint 1
+    System.out.println("\n\nMember Trends Sprint 1:  Healthy");
     chart = telemetryClient.getChart(name, joe, project, day, start1, end1, joe);
     System.out.println(TelemetryClient.toString(chart));
     chart = telemetryClient.getChart(name, joe, project, day, start1, end1, bob);
     System.out.println(TelemetryClient.toString(chart));
-    // Week 2
-    System.out.println("\n\nMember Trends Week 2: Late start");
+    // Sprint 2
+    System.out.println("\n\nMember Trends Sprint 2: Late start");
     chart = telemetryClient.getChart(name, joe, project, day, start2, end2, joe);
     System.out.println(TelemetryClient.toString(chart));
     chart = telemetryClient.getChart(name, joe, project, day, start2, end2, bob);
     System.out.println(TelemetryClient.toString(chart));
-    // Week 3
-    System.out.println("\n\nMember Trends Week 3: High churn, falling coverage");
+    // Sprint 3
+    System.out.println("\n\nMember Trends Sprint 3: High churn, falling coverage");
     chart = telemetryClient.getChart(name, joe, project, day, start3, end3, joe);
     System.out.println(TelemetryClient.toString(chart));
     chart = telemetryClient.getChart(name, joe, project, day, start3, end3, bob);
     System.out.println(TelemetryClient.toString(chart));
-    // Week 4
-    System.out.println("\n\nMember Trends Week 4: Resource imbalance");
+    // Sprint 4
+    System.out.println("\n\nMember Trends Sprint 4: Resource imbalance");
     chart = telemetryClient.getChart(name, joe, project, day, start4, end4, joe);
     System.out.println(TelemetryClient.toString(chart));
     chart = telemetryClient.getChart(name, joe, project, day, start4, end4, bob);
@@ -294,43 +303,34 @@ public class TestSimpleTelemetry extends SimDataTestHelper {
   @Test public void testAllProductTrends() throws Exception {
     String devChart = "ProductDevTrends";
     String qaChart = "ProductQATrends";
-    XMLGregorianCalendar start1 = day1;
-    XMLGregorianCalendar start2 = Tstamp.incrementDays(start1, 7);
-    XMLGregorianCalendar start3 = Tstamp.incrementDays(start1, 14);
-    XMLGregorianCalendar start4 = Tstamp.incrementDays(start1, 21);
-    XMLGregorianCalendar end1 = Tstamp.incrementDays(start1, 4);
-    XMLGregorianCalendar end2 = Tstamp.incrementDays(start2, 4);
-    XMLGregorianCalendar end3 = Tstamp.incrementDays(start3, 4);
-    XMLGregorianCalendar end4 = Tstamp.incrementDays(start4, 4);
-
     TelemetryChartData chart;
     
-    // Week 1
-    System.out.println("\n\nProduct Trends Week 1:  Healthy");
+    // Sprint 1
+    System.out.println("\n\nProduct Trends Sprint 1:  Healthy");
     chart = telemetryClient.getChart(devChart, joe, project, day, start1, end1);
     System.out.println(TelemetryClient.toString(chart));
     chart = telemetryClient.getChart(qaChart, joe, project, day, start1, end1);
     System.out.println(TelemetryClient.toString(chart));
-    // Week 2
-    System.out.println("\n\nProduct Trends Week 2: Late start");
+    // Sprint 2
+    System.out.println("\n\nProduct Trends Sprint 2: Late start");
     chart = telemetryClient.getChart(devChart, joe, project, day, start2, end2);
     System.out.println(TelemetryClient.toString(chart));
     chart = telemetryClient.getChart(qaChart, joe, project, day, start2, end2);
     System.out.println(TelemetryClient.toString(chart));
-    // Week 3
-    System.out.println("\n\nProduct Trends Week 3: High churn, falling coverage");
+    // Sprint 3
+    System.out.println("\n\nProduct Trends Sprint 3: High churn, falling coverage");
     chart = telemetryClient.getChart(devChart, joe, project, day, start3, end3);
     System.out.println(TelemetryClient.toString(chart));
     chart = telemetryClient.getChart(qaChart, joe, project, day, start3, end3);
     System.out.println(TelemetryClient.toString(chart));
-    // Week 4
-    System.out.println("\n\nProduct Trends Week 4: Resource imbalance");
+    // Sprint 4
+    System.out.println("\n\nProduct Trends Sprint 4: Resource imbalance");
     chart = telemetryClient.getChart(devChart, joe, project, day, start4, end4);
     System.out.println(TelemetryClient.toString(chart));
     chart = telemetryClient.getChart(qaChart, joe, project, day, start4, end4);
     System.out.println(TelemetryClient.toString(chart));
 
-    assertEquals("Checking for 3 streams returned", 3, chart.getTelemetryStream().size());
+    assertEquals("Checking for 4 streams returned", 4, chart.getTelemetryStream().size());
   }
   
   
