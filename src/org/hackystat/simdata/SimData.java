@@ -15,6 +15,7 @@ import org.hackystat.sensorbase.resource.sensordata.jaxb.Properties;
 import org.hackystat.sensorbase.resource.sensordata.jaxb.Property;
 import org.hackystat.sensorbase.resource.sensordata.jaxb.SensorData;
 import org.hackystat.sensorshell.SensorShell;
+import org.hackystat.sensorshell.SensorShellException;
 import org.hackystat.sensorshell.SensorShellProperties;
 import org.hackystat.simdata.simpletelemetry.SimpleTelemetry;
 import org.hackystat.utilities.logger.HackystatLogger;
@@ -113,7 +114,7 @@ public class SimData {
    * Invokes quit() on all created shells, thus ensuring that any remaining buffered
    * data is sent to the host. 
    */
-  public void quitShells() {
+  public void quitShells() throws SensorShellException {
     for (SensorShell shell : shells.values()) {
       shell.quit();
     }
