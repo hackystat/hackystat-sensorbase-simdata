@@ -113,6 +113,7 @@ public class SimData {
   /**
    * Invokes quit() on all created shells, thus ensuring that any remaining buffered
    * data is sent to the host. 
+   * @throws SensorShellException If there was a prior error involving autosend. 
    */
   public void quitShells() throws SensorShellException {
     for (SensorShell shell : shells.values()) {
