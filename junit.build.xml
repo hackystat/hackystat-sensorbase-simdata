@@ -27,6 +27,7 @@
       </batchtest>
       <sysproperty key="org.hackystat.simdata.TestSimpleTelemetry.sendData" value="${SimpleTelemetry.sendData}"/>
       <sysproperty key="user.dir" value="${basedir}"/>
+      <sysproperty key="HACKYSTAT_SENSORBASE_HOME" value="${env.HACKYSTAT_SENSORBASE_HOME}" />
     </junit>
   </target>
 
