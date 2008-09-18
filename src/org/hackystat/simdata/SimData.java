@@ -10,6 +10,7 @@ import org.hackystat.sensorbase.client.SensorBaseClient;
 import org.hackystat.sensorbase.client.SensorBaseClientException;
 import org.hackystat.sensorbase.client.SensorBaseClient.InvitationReply;
 import org.hackystat.sensorbase.resource.projects.jaxb.Project;
+import org.hackystat.sensorbase.resource.projects.jaxb.ProjectRef;
 import org.hackystat.sensorbase.resource.projects.jaxb.UriPatterns;
 import org.hackystat.sensorbase.resource.sensordata.jaxb.Properties;
 import org.hackystat.sensorbase.resource.sensordata.jaxb.Property;
@@ -17,6 +18,7 @@ import org.hackystat.sensorbase.resource.sensordata.jaxb.SensorData;
 import org.hackystat.sensorshell.SensorShell;
 import org.hackystat.sensorshell.SensorShellException;
 import org.hackystat.sensorshell.SensorShellProperties;
+import org.hackystat.simdata.simpleportfolio.SimplePortfolio;
 import org.hackystat.simdata.simpletelemetry.SimpleTelemetry;
 import org.hackystat.utilities.logger.HackystatLogger;
 import org.hackystat.utilities.tstamp.Tstamp;
@@ -91,6 +93,36 @@ public class SimData {
     client.deleteSensorData(email); 
     clients.put(userName, client);
     shells.put(userName, makeShell(email));
+  }
+
+  /**
+   * Clear data associated with the given user.
+   * @param host the host that holds the data.
+   * @param user the given user.
+   */
+  public void clearData(String host, String user) {
+    String email = user + testdomain;
+    SensorBaseClient client = new SensorBaseClient(host, email, email);
+    try {
+      client.authenticate();
+      client.deleteSensorData(email);
+      for (ProjectRef ref : client.getProjectIndex(email).getProjectRef()) {
+        Project project = client.getProject(ref);
+        //System.err.println("Removing project " + project.getName() + project.getOwner());
+        if (email.equals(project.getOwner()) && !"Default".equals(project.getName())) {
+          client.deleteProject(email, project.getName());
+        }
+      }
+      //client.deleteUser(email);
+    }
+    catch (SensorBaseClientException e) {
+      if (e.getMessage().contains("Authentication") && e.getMessage().contains("failed")) {
+        getLogger().info("User not existed, no need to clear.");
+      }
+      else {
+        e.printStackTrace();
+      }
+    }
   }
   
   /**
@@ -398,6 +430,25 @@ public class SimData {
     addProperty(data, "line_Uncovered", String.valueOf(uncovered));
     shells.get(user).add(data);
   }
+
+  /**
+   * Adds a single Coupling sensor data instance.
+   * Pass the target coupling as an int, which will be divided between efferent and afferent.
+   * @param user The user who owns this Commit.
+   * @param tstamp The tstamp (and runtime) for this Commit.
+   * @param file The resource.
+   * @param coupling The total churn (lines added plus deleted).
+   * @throws Exception If problems occur. 
+   */
+  public void addCoupling(String user, XMLGregorianCalendar tstamp, String file, int coupling) 
+  throws Exception {
+    int efferent = (int)(coupling * 0.5);
+    int afferent = coupling - efferent;
+    SensorData data = makeSensorData(user, "Coupling", "DependencyFinder", file, tstamp);
+    addProperty(data, "Efferent", String.valueOf(efferent));
+    addProperty(data, "Afferent", String.valueOf(afferent));
+    shells.get(user).add(data);
+  }
   
   /**
    * Takes one argument, the SensorBase host, such as "http://localhost:9876/sensorbase".
@@ -413,6 +464,8 @@ public class SimData {
     String host = args[0];
     // Create the simple telemetry scenario.
     new SimpleTelemetry(host);
+    // Create the simple portfolio scenario.
+    new SimplePortfolio(host);
   }
 
 }
