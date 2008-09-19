@@ -17,14 +17,14 @@ public class SimplePortfolio {
   /** The user name. */
   static final String joe = "joe.simpleportfolio";
   /** The project name for good portfolio. */
-  static final String project1 = "goodportfolio";
+  static final String project1 = "GoodProject";
   /** The project name for bad portfolio. */
-  static final String project2 = "troubleportfolio";
+  static final String project2 = "TroubledProject";
   /** The project name for unstable portfolio. */
-  static final String project3 = "unstableportfolio";
+  static final String project3 = "UnstableProject";
   
   /** The period these data will cover. */
-  static final int dataPeriod = 35;
+  static final int dataPeriod = 40;
   
   /** Start date of the projects. */
   private final XMLGregorianCalendar projectStart = 
@@ -101,7 +101,7 @@ public class SimplePortfolio {
    * <li> Builds and unit tests between 2-6 times a day.
    * <li> Coverage is always at least 80%.
    * <li> Average complexity is low and stable.
-   * <li> CodeIssues is stable and low, between 0 and 2 per file.
+   * <li> CodeIssues is stable and low, 2 per file.
    * <li> They each commit once a day, with relatively low churn (less than 20%).
    * </ul>
    * @throws Exception If problems occur.
@@ -121,21 +121,21 @@ public class SimplePortfolio {
       simData.addFileMetric(joe, day, getFilePath(project1, joe), joeFileSize, day);
       
       // Complexity is low and stable.
-      simData.addComplexity(joe, day, getFilePath(project1, joe), joeFileSize, day, 3);
+      simData.addComplexity(joe, day, getFilePath(project1, joe), joeFileSize, day, 4 - i / 15);
 
       // Coupling is low and stable.
-      simData.addCoupling(joe, day, getFilePath(project1, joe), 6);
+      simData.addCoupling(joe, day, getFilePath(project1, joe), 6 - i / 20);
       
-      // Builds and unit tests between 2-6 times a day.
-      simData.addBuilds(joe, day, getDir(project1, joe), SUCCESS, 3 + random.nextInt(4));
-      simData.addUnitTests(joe, day, getFilePath(project1, joe), PASS, 1 + random.nextInt(5));
+      // Builds and unit tests between 3-5 times a day.
+      simData.addBuilds(joe, day, getDir(project1, joe), SUCCESS, 3 + random.nextInt(2));
+      simData.addUnitTests(joe, day, getFilePath(project1, joe), PASS, 2 + random.nextInt(3));
       
       // Coverage is always at least 80%, increasing slowly.
-      if (i % (random.nextInt(4) + 3) == 0) {
-        joeCoverage += random.nextInt(3);
+      if (i % 4 == 0) {
+        joeCoverage += random.nextInt(5);
       }
-      if (joeCoverage > 98) {
-        joeCoverage = 98;
+      if (joeCoverage > 95) {
+        joeCoverage = 95;
       }
       simData.addCoverage(joe, day, getFilePath(project1, joe), joeCoverage, joeFileSize,  day);
       
@@ -143,8 +143,8 @@ public class SimplePortfolio {
       simData.addCommit(joe, day, getFilePath(project1, joe), 23 + random.nextInt(5));
       simData.addCommit(joe, day, getFilePath(project1, joe), 20 + random.nextInt(10));
       
-      // Code issues are low and stable, between 0 and 2 per file.
-      simData.addCodeIssues(joe, day, getFilePath(project1, joe), random.nextInt(2));
+      // Code issues are low and stable, 2 per file.
+      simData.addCodeIssues(joe, day, getFilePath(project1, joe), 3 - i / 20);
     }
   }
 
@@ -171,7 +171,7 @@ public class SimplePortfolio {
       simData.addDevEvents(joe, day, (12 * 2) + random.nextInt(12 * 7), getFilePath(project2, joe));
       
       // Size is quite variable
-      int joeFileSize = 300 + i * 20 + random.nextInt((i + 1) * 30);
+      int joeFileSize = 300 + i * 34 + random.nextInt((i + 1) * 26);
       simData.addFileMetric(joe, day, getFilePath(project2, joe), joeFileSize, day);
       
       // Complexity steadily rising.
@@ -182,11 +182,8 @@ public class SimplePortfolio {
       simData.addUnitTests(joe, day, getFilePath(project2, joe), PASS, 1 + random.nextInt(2));
       
       // Coverage shows a falling trend.
-      if (i % (random.nextInt(4) + 3) == 0) {
-        joeCoverage -= random.nextInt(10);
-      }
-      if (joeCoverage < 30) {
-        joeCoverage += 5 + random.nextInt(15);
+      if (i % 3 == 0) {
+        joeCoverage -= random.nextInt(6);
       }
       simData.addCoverage(joe, day, getFilePath(project2, joe), joeCoverage, joeFileSize,  day);
 
@@ -219,33 +216,31 @@ public class SimplePortfolio {
    * @throws Exception If problems occur.
    */
   private void makeSprint3() throws Exception {
-    int joeFileSize = 300; 
-    int joeCoverage = 80;
+    int joeFileSize = 300;
+    int joeCoverage = 60;
     for (int i = 0; i < dataPeriod; i++) {
       XMLGregorianCalendar day = Tstamp.incrementDays(projectStart, i);
       simData.getLogger().info(LOGPREFIX + day);
 
-      // Effort is constant, between three and four hours a day.
-      simData.addDevEvents(joe, day, (12 * 3) + random.nextInt(12), getFilePath(project3, joe));
+      // Effort is constant, between one and five hours a day.
+      simData.addDevEvents(joe, day, 12 + random.nextInt(12 * 5), getFilePath(project3, joe));
       
-      // Size increases unsteadily, starting at 500 and increasing by 5~160 LOC per day.
-      joeFileSize += 5 + random.nextInt(150);
+      // Size increases unsteadily, starting at 300. Increase varies over days.
+      joeFileSize += (i % 15) * (i % 15);
       simData.addFileMetric(joe, day, getFilePath(project3, joe), joeFileSize, day);
       
       // Complexity is low but unstable, variable between 3-10
       simData.addComplexity(joe, day, getFilePath(project3, joe), joeFileSize, day, 
-                            3 + random.nextInt(i % 6 + 2));
+                            3 + i / 10 + i % (random.nextInt(9) + 1));
       
       // Builds and unit tests between 1-10 times a day.
-      simData.addBuilds(joe, day, getDir(project3, joe), SUCCESS, 2 + random.nextInt(8));
-      simData.addUnitTests(joe, day, getFilePath(project3, joe), PASS, 1 + random.nextInt(7));
+      simData.addBuilds(joe, day, getDir(project3, joe), SUCCESS, 1 + random.nextInt(9));
+      simData.addUnitTests(joe, day, getFilePath(project3, joe), PASS, 1 + random.nextInt(9));
       
-      // Coverage is always at least 80%, increasing slowly.
-      if (i % (random.nextInt(4) + 3) == 0) {
-        joeCoverage += random.nextInt(3);
-      }
-      if (joeCoverage > 98) {
-        joeCoverage = 98;
+      // Coverage varies between 60% to 80%.
+      joeCoverage += random.nextInt(13);
+      if (joeCoverage > 88) {
+        joeCoverage -= 20 + random.nextInt(10);
       }
       simData.addCoverage(joe, day, getFilePath(project3, joe), joeCoverage, joeFileSize,  day);
       
