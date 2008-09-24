@@ -24,13 +24,14 @@ public class SimplePortfolio {
   static final String project3 = "UnstableProject";
   
   /** The period these data will cover. */
-  static final int dataPeriod = 40;
+  static final int dataPeriod = 35;
   
   /** Start date of the projects. */
-  private final XMLGregorianCalendar projectStart = 
-    Tstamp.incrementDays(Tstamp.makeTimestamp(), -dataPeriod);
+  private final XMLGregorianCalendar projectStart = Tstamp.makeTimestamp("2008-06-01");
+  /** Start date of the software development progress data. */
+  private final XMLGregorianCalendar dataStart = Tstamp.makeTimestamp("2008-07-01");
   /** End date of the projects. */
-  private final XMLGregorianCalendar projectEnd = Tstamp.incrementDays(Tstamp.makeTimestamp(), 10);
+  private final XMLGregorianCalendar projectEnd = Tstamp.makeTimestamp("2008-08-08");
   /** A random number generator. */
   private final Random random = new Random(0);
   
@@ -110,7 +111,7 @@ public class SimplePortfolio {
     int joeFileSize = 300; 
     int joeCoverage = 80;
     for (int i = 0; i < dataPeriod; i++) {
-      XMLGregorianCalendar day = Tstamp.incrementDays(projectStart, i);
+      XMLGregorianCalendar day = Tstamp.incrementDays(dataStart, i);
       simData.getLogger().info(LOGPREFIX + day);
 
       // Effort is constant, between three and four hours a day.
@@ -160,11 +161,11 @@ public class SimplePortfolio {
    * @throws Exception If problems occur.
    */
   private void makeSprint2() throws Exception {
-    int joeCoverage = 80;
+    int joeCoverage = 95;
     int codeIssue = 2;
     int coupling = 5;
     for (int i = 0; i < dataPeriod; i++) {
-      XMLGregorianCalendar day = Tstamp.incrementDays(projectStart, i);
+      XMLGregorianCalendar day = Tstamp.incrementDays(dataStart, i);
       simData.getLogger().info(LOGPREFIX + day);
 
       // Effort varies between 2 and 9 hours 
@@ -182,8 +183,8 @@ public class SimplePortfolio {
       simData.addUnitTests(joe, day, getFilePath(project2, joe), PASS, 1 + random.nextInt(2));
       
       // Coverage shows a falling trend.
-      if (i % 3 == 0) {
-        joeCoverage -= random.nextInt(6);
+      if (i % 7 == 0) {
+        joeCoverage -= 3;
       }
       simData.addCoverage(joe, day, getFilePath(project2, joe), joeCoverage, joeFileSize,  day);
 
@@ -217,9 +218,9 @@ public class SimplePortfolio {
    */
   private void makeSprint3() throws Exception {
     int joeFileSize = 300;
-    int joeCoverage = 60;
+    int joeCoverage = 55;
     for (int i = 0; i < dataPeriod; i++) {
-      XMLGregorianCalendar day = Tstamp.incrementDays(projectStart, i);
+      XMLGregorianCalendar day = Tstamp.incrementDays(dataStart, i);
       simData.getLogger().info(LOGPREFIX + day);
 
       // Effort is constant, between one and five hours a day.
@@ -238,9 +239,15 @@ public class SimplePortfolio {
       simData.addUnitTests(joe, day, getFilePath(project3, joe), PASS, 1 + random.nextInt(9));
       
       // Coverage varies between 60% to 80%.
+      /*
       joeCoverage += random.nextInt(13);
       if (joeCoverage > 88) {
         joeCoverage -= 20 + random.nextInt(10);
+      }
+      */
+      // Coverage shows a increasing trend.
+      if (i % 7 == 0) {
+        joeCoverage += 5;
       }
       simData.addCoverage(joe, day, getFilePath(project3, joe), joeCoverage, joeFileSize,  day);
       

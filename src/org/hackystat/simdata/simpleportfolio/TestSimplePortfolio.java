@@ -20,11 +20,17 @@ public class TestSimplePortfolio extends SimDataTestHelper {
   /** The project1 in SimplePortfolio. */
   private static final String project1 = SimplePortfolio.project1;
   /** Timestamp of yesterday. */
-  private static final XMLGregorianCalendar yesterday = 
-    Tstamp.incrementDays(Tstamp.makeTimestamp(), -1);
+  private final XMLGregorianCalendar yesterday = Tstamp.makeTimestamp("2008-08-03");
   /** Timestamp of first day. */
-  private static final XMLGregorianCalendar firstDay = 
-    Tstamp.incrementDays(Tstamp.makeTimestamp(), -SimplePortfolio.dataPeriod);
+  private final XMLGregorianCalendar firstDay = Tstamp.makeTimestamp("2008-07-01");
+  
+  /**
+   * Constructor
+   * @throws Exception when error occurs.
+   */
+  public TestSimplePortfolio() throws Exception {
+    //Do nothing
+  }
   
   /** 
    * Test the simple portfolio scenario.
