@@ -25,7 +25,7 @@ public class TestSimplePortfolio extends SimDataTestHelper {
   private final XMLGregorianCalendar firstDay = Tstamp.makeTimestamp("2008-07-01");
   
   /**
-   * Constructor
+   * Constructor.
    * @throws Exception when error occurs.
    */
   public TestSimplePortfolio() throws Exception {

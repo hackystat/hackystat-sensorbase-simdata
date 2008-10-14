@@ -289,6 +289,7 @@ public class SimpleTelemetry {
    * <li> Effort, size, builds, and unit tests are quite variable.
    * <li> Coverage shows a falling trend.
    * <li> High churn on commits.
+   * </ul>
    * @throws Exception If problems occur.
    */
   private void makeSprint4() throws Exception {
