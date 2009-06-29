@@ -45,6 +45,7 @@
         <path refid="compile.classpath" />
       </classpath>
       <sysproperty key="user.dir" value="${basedir}" />
+      <sysproperty key="org.hackystat.simdata.TestSimpleTelemetry.sendData" value="${SimpleTelemetry.sendData}"/>    
       <sysproperty key="emma.coverage.out.file" value="${build.dir}/emma/coverage.emma" />
       <sysproperty key="emma.coverage.out.merge" value="true" />
       <formatter type="xml" />

@@ -1,4 +1,4 @@
-<project name="stack.junit" default="junit" xmlns:ivy="antlib:org.apache.ivy.ant">
+<project name="junit" default="junit" xmlns:ivy="antlib:org.apache.ivy.ant">
   <description>
     Runs junit on system, using tests in classes whose names start with Test*.
     Invocation: ant -f junit.build.xml
