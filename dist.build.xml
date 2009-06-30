@@ -23,7 +23,6 @@
       <fileset dir="${build.jar.dir}" includes="*.jar" />
     </copy>
     
-
     <!-- Create the zip distribution of this system, and then delete the tmp dir. -->
     <mkdir dir="${dist.dir}" />
     <zip zipfile="${dist.dir}/${system.name}-${version}.zip" basedir="${dist.tmp.dir}" />
