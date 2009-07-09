@@ -2,6 +2,8 @@
   <info organisation="org.hackystat" module="hackystat-sensorbase-simdata"/>
   <publications>
     <artifact name="simdata" />
+    <artifact name="hackystat-sensorbase-simdata-javadoc" type="javadoc" ext="zip"/>
+    <artifact name="hackystat-sensorbase-simdata-source" type="source" ext="zip"/>    
   </publications>
   <dependencies>
     <dependency org="org.junit" name="junit" rev="${junit.version}" />

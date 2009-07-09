@@ -3,10 +3,26 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="var" path="HACKYSTAT_DAILYPROJECTDATA_HOME/dailyprojectdata.jar"/>
-	<classpathentry kind="var" path="HACKYSTAT_SENSORSHELL_HOME/sensorshell.jar"/>
-	<classpathentry kind="var" path="JAVAMAIL_HOME/mail.jar"/>
-	<classpathentry kind="var" path="HACKYSTAT_TELEMETRY_HOME/telemetry.jar"/>
-	<classpathentry kind="var" path="HACKYSTAT_SENSORBASE_HOME/sensorbase.jar"/>
+	<classpathentry kind="lib" path="lib/hackystat-analysis-dailyprojectdata/dailyprojectdata.jar" sourcepath="lib/hackystat-analysis-dailyprojectdata/hackystat-analysis-dailyprojectdata-source.zip">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/hackystat-sensorbase-simdata/lib/hackystat-analysis-dailyprojectdata/hackystat-analysis-dailyprojectdata-javadoc.zip!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/hackystat-analysis-telemetry/telemetry.lib.jar" sourcepath="lib/hackystat-analysis-telemetry/hackystat-analysis-telemetry-source.zip">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/hackystat-sensorbase-simdata/lib/hackystat-analysis-telemetry/hackystat-analysis-telemetry-javadoc.zip!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/hackystat-sensor-shell/sensorshell.jar" sourcepath="lib/hackystat-sensor-shell/hackystat-sensor-shell-source.zip">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/hackystat-sensorbase-simdata/lib/hackystat-sensor-shell/hackystat-sensor-shell-javadoc.zip!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/hackystat-sensorbase-uh/sensorbase.jar" sourcepath="lib/hackystat-sensorbase-uh/hackystat-sensorbase-uh-source.zip">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/hackystat-sensorbase-simdata/lib/hackystat-sensorbase-uh/hackystat-sensorbase-uh-javadoc.zip!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/junit/junit.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
