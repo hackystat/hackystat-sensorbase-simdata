@@ -16,10 +16,7 @@
   <import file="findbugs.build.xml"/>
   <import file="checkstyle.build.xml"/>
   <import file="junit.build.xml"/>
-  <import file="emma.build.xml"/>
-  <import file="sclc.build.xml"/>
-
-      
+     
   <target name="verify" 
      depends="clean, compile, checkstyle.tool, junit.tool, findbugs.tool, pmd.tool" 
      description="Invoke analyzers, fail if any errors found.">
